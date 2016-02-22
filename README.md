@@ -1,2 +1,2 @@
 # KEHANG.github.io
-This is a blog for my research topics using [Jekyll](jekyllrb.com)
+This is a blog for my research and interests using [Jekyll](jekyllrb.com)
