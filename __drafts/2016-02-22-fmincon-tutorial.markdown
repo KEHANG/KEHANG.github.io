@@ -81,7 +81,7 @@ Now with the basic knowledge of using `fmincon`, let's apply it to our reactor d
 
 2. Kinetics
 
-3. Variable bonds
+3. Variable bounds
 
 [matlab-fmincon-tutorial]: http://www.mathworks.com/help/optim/ug/fmincon.html?refresh=true#busohxx-2
 
