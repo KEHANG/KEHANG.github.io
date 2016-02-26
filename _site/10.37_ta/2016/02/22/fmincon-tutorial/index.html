@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Reactor Optimization with fmincon!</title>
+  <meta name="description" content="MIT 10.37 students and other chemical engineers in reactor enegineering might find this post interesting. Here I’m going to talk about how to apply fmincon t...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://yourdomain.com/10.37_ta/2016/02/22/fmincon-tutorial/">
+  <link rel="alternate" type="application/rss+xml" title="Kehang Han blog" href="http://yourdomain.com/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Kehang Han blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+          <a class="page-link" href="https://hkh12.scripts.mit.edu">Kehang's Home</a>
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">Reactor Optimization with fmincon!</h1>
+    <p class="post-meta"><time datetime="2016-02-22T14:00:51-05:00" itemprop="datePublished">Feb 22, 2016</time></p>
+    <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>MIT 10.37 students and other chemical engineers in reactor enegineering might find this post interesting. Here I’m going to talk about how to apply <code class="highlighter-rouge">fmincon</code> to typical reactor engineering optimization problems.</p>
+
+<h3 id="basic-fmincon-usage">Basic <code class="highlighter-rouge">fmincon</code> usage</h3>
+
+<p>Consider the optimization problem below,</p>
+
+<script type="math/tex; mode=display">\underset{X}{\text{minimize}}\ 100  \left(  x_2-x_1^2 \right) ^2 + \left( 1-x_1\right) ^2</script>
+
+<script type="math/tex; mode=display">s.t.\ x_1 + 2x_2 \leq 4</script>
+
+<script type="math/tex; mode=display">2x_1 + x_2 = 1</script>
+
+<script type="math/tex; mode=display">0 \leq x_1 \leq 0.4</script>
+
+<script type="math/tex; mode=display">0 \leq x_2 \leq 0.4</script>
+
+<p>it only takes three steps to translate into matlab code as shown below.</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="c1">% step1: define objective function</span>
+<span class="n">fun</span> <span class="o">=</span> <span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span> 
+
+<span class="c1">% step2: set up constraints</span>
+<span class="n">A</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">];</span>
+<span class="n">b</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span>
+<span class="n">Aeq</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">];</span>
+<span class="n">beq</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+<span class="n">lb</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">];</span>
+<span class="n">ub</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">];</span>
+
+<span class="c1">% step3: provide initial guess and call fmincon</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">];</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">fmincon</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Aeq</span><span class="p">,</span> <span class="n">beq</span><span class="p">,</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">)</span></code></pre></figure>
+
+<p>There’s an alternative way of translating constraints, instead of using <code class="highlighter-rouge">A</code>, <code class="highlighter-rouge">b</code>, <code class="highlighter-rouge">Aeq</code>, <code class="highlighter-rouge">beq</code>, <code class="highlighter-rouge">lb</code>, and <code class="highlighter-rouge">ub</code>, we can use <code class="highlighter-rouge">c</code> and <code class="highlighter-rouge">ceq</code>.</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="c1">% step1: define objective function</span>
+<span class="n">fun</span> <span class="o">=</span> <span class="o">@</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="mi">100</span><span class="o">*</span><span class="p">(</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span><span class="p">)</span><span class="o">^</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span><span class="o">^</span><span class="mi">2</span><span class="p">;</span> 
+
+<span class="c1">% step2: set up constraints</span>
+<span class="k">function</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span><span class="n">ceq</span><span class="p">]</span> <span class="o">=</span> <span class="n">constraints</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">2</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">4</span><span class="p">;</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.4</span><span class="p">;</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mf">0.4</span><span class="p">;</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">ceq</span> <span class="o">=</span> <span class="mi">2</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+<span class="k">return</span>
+
+<span class="n">A</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="n">b</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="n">Aeq</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="n">beq</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="n">lb</span> <span class="o">=</span> <span class="p">[];</span>
+<span class="n">ub</span> <span class="o">=</span> <span class="p">[];</span>
+
+<span class="c1">% step3: provide initial guess and call fmincon</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">];</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">fmincon</span><span class="p">(</span><span class="n">fun</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">A</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">Aeq</span><span class="p">,</span> <span class="n">beq</span><span class="p">,</span><span class="n">lb</span><span class="p">,</span> <span class="n">ub</span><span class="p">,</span> <span class="o">@</span><span class="n">constraints</span><span class="p">)</span></code></pre></figure>
+
+<p><a href="http://www.mathworks.com/help/optim/ug/fmincon.html?refresh=true#busohxx-2">Matlab tutorial</a> has well covered typical ways of using <code class="highlighter-rouge">fmincon</code> to perform optimization. Please check it out if you want to know more.</p>
+
+<h3 id="reactor-optimization-example">Reactor optimization example</h3>
+
+<p>Now with the basic knowledge of using <code class="highlighter-rouge">fmincon</code>, let’s apply it to our reactor design domain. A good example is 2016-02-22’s 10.37 <a href="https://stellar.mit.edu/S/course/10/sp16/10.37/courseMaterial/topics/topic3/lectureNotes/Recitation_Slides_Feb_22_2016/Recitation_Slides_Feb_22_2016.pdf">recitation problem</a>. It has a typical reaction pathway where reactant goes to desired product, which however will react to form an undesired product. As chemical engineers, we should manipulate knobs, e.g., temperature, residence time, etc., in order to maximize molar yiled of desired product.</p>
+
+<h4 id="define-objective-function">Define objective function</h4>
+
+<p>As we discussed, here we want to maximize molar yield of <code class="highlighter-rouge">D</code> (diglyceride) by tuning <script type="math/tex">T</script> (temperature), <script type="math/tex">C_{T,0}</script>, <script type="math/tex">C_{CH_3O,0}</script>, <script type="math/tex">C_{CH_3OH,0}</script> and <script type="math/tex">\tau</script>. Putting it into mathematic term would be</p>
+
+<script type="math/tex; mode=display">\underset{T,\ C_{T,0},\ C_{CH_3O,0},\ C_{CH_3OH,0},\ \tau }{\text{minimize}}\ -  \frac{C_D}{C_{T,0}}</script>
+
+<p>Translating it to matlab, we can define in below:</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="k">function</span> <span class="n">obj</span> <span class="o">=</span> <span class="n">objFun</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="c1">% x(1) = tau</span>
+<span class="c1">% x(2) = temperature</span>
+<span class="c1">% x(3) = [T]_0</span>
+<span class="c1">% x(4) = [CH3O]_0</span>
+<span class="c1">% x(5) = [CH3OH]_0</span>
+<span class="c1">% x(6) = [T]</span>
+<span class="c1">% x(7) = [CH3O]</span>
+<span class="c1">% x(8) = [CH3OH]</span>
+<span class="c1">% x(9) = [D]</span>
+<span class="c1">% x(10) = k (the kinetic coefficient)</span>
+
+<span class="n">obj</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">9</span><span class="p">)/</span><span class="n">x</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span> <span class="c1">% molar yield of D</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4 id="set-up-constraints">Set up constraints</h4>
+
+<p>Almost all the real-life chemical engineering optimization problems have certain number of constraints. They are usually from <code class="highlighter-rouge">mass balance</code>, <code class="highlighter-rouge">kinetics rules</code>, <code class="highlighter-rouge">physical bounds</code>, etc.</p>
+
+<ul>
+  <li>Mass balance</li>
+</ul>
+
+<p>For convenience, we assume volumetric flowrate is not changed from inlet to outlet. so we have the following equations for major species’ mass balance in CSTR.</p>
+
+<script type="math/tex; mode=display">0 = - C_D + (3C_T - 2C_D)*kC_{CH_3O}\tau</script>
+
+<script type="math/tex; mode=display">0 = - C_{T,0} - C_T - 3C_T*kC_{CH_3O}\tau</script>
+
+<script type="math/tex; mode=display">0 = C_{CH_3O,0} - C_{CH_3O}</script>
+
+<script type="math/tex; mode=display">0 = C_{CH_3OH,0} - C_{CH_3OH} - (3C_T - 2C_D)*kC_{CH_3O}\tau</script>
+
+<ul>
+  <li>Kinetics rules</li>
+</ul>
+
+<p>Kinetics coefficient <code class="highlighter-rouge">k</code> has temperature dependence according to Arrhenius law.</p>
+
+<script type="math/tex; mode=display">0 = k - A*exp(\frac{-E_a}{RT})</script>
+
+<ul>
+  <li>Physical bounds</li>
+</ul>
+
+<p>Physical bounds are those constraints that seem obvious to you but can largely reduce the search space for Matlab. So in order to get correct answer more quickly, we should provide as much extra information of physics as possible.</p>
+
+<p>For instance, the concentrations and residence time can not be negative, and temperature should always be grater than 273 K (otherwise frozen). Here we will add another constraint where temperature cannot go beyound 350 C because of heating power limitation.</p>
+
+<p>In summary we have,</p>
+
+<script type="math/tex; mode=display">0 \leq C_T</script>
+
+<script type="math/tex; mode=display">0 \leq C_{CH3O}</script>
+
+<script type="math/tex; mode=display">0 \leq C_{CH3OH}</script>
+
+<script type="math/tex; mode=display">0 \leq \tau</script>
+
+<script type="math/tex; mode=display">273 K \leq T \leq 623 K</script>
+
+<p>Put all these constraints together in Matlab using <code class="highlighter-rouge">c</code> and <code class="highlighter-rouge">ceq</code>,</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="k">function</span> <span class="p">[</span><span class="n">c</span><span class="p">,</span> <span class="n">ceq</span><span class="p">]</span> <span class="o">=</span> <span class="n">allcon</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="c1">% params</span>
+<span class="c1">% assign some easy numbers for</span>
+<span class="c1">% Arrhenius expression params</span>
+<span class="n">A</span> <span class="o">=</span> <span class="nb">exp</span><span class="p">(</span><span class="mi">2</span><span class="p">);</span>
+<span class="n">R</span> <span class="o">=</span> <span class="mf">8.314</span><span class="p">;</span>
+<span class="n">Ea</span> <span class="o">=</span> <span class="n">R</span><span class="o">*</span><span class="mi">600</span><span class="p">;</span>
+
+<span class="c1">% ineqn</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">273</span><span class="p">;</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">3</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">4</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">6</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">8</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">9</span><span class="p">);</span>
+<span class="n">c</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">623</span><span class="p">;</span>
+
+<span class="c1">% eqn</span>
+<span class="n">ceq</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span> <span class="o">-</span> <span class="n">A</span><span class="o">*</span><span class="nb">exp</span><span class="p">(</span><span class="o">-</span><span class="n">Ea</span><span class="p">/</span><span class="n">R</span><span class="p">/</span><span class="n">x</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+<span class="n">ceq</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">=</span> <span class="o">-</span><span class="n">x</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ceq</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="n">ceq</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">);</span>
+<span class="n">ceq</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">=</span> <span class="n">x</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span> <span class="o">-</span> <span class="n">x</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span> <span class="o">-</span> <span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">7</span><span class="p">)</span><span class="o">*</span><span class="n">x</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+<span class="k">end</span></code></pre></figure>
+
+<h4 id="call-fmincon-to-optimize">call <code class="highlighter-rouge">fmincon</code> to optimize</h4>
+
+<p>Simply run the optimization by calling <code class="highlighter-rouge">fmincon</code> and feeding <code class="highlighter-rouge">objFun</code> and <code class="highlighter-rouge">allcon</code> we defined early.</p>
+
+<figure class="highlight"><pre><code class="language-matlab" data-lang="matlab"><span class="c1">% give the following initial guess for the optimal solution</span>
+<span class="c1">% tau = 1</span>
+<span class="c1">% temperature = 300K</span>
+<span class="c1">% [T]0 = 4</span>
+<span class="c1">% [C3H0]0 = 1</span>
+<span class="c1">% [CH3OH]0 = 6</span>
+<span class="c1">% [T] = 1</span>
+<span class="c1">% [CH3O] = 1</span>
+<span class="c1">% [CH3OH] = 1</span>
+<span class="c1">% [D] = 1</span>
+<span class="c1">% k = 1</span>
+<span class="n">x0</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">300</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">];</span>
+<span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">fval</span><span class="p">]</span> <span class="o">=</span> <span class="n">fmincon</span><span class="p">(</span><span class="o">@</span><span class="n">objFun</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="o">@</span><span class="n">allcon</span><span class="p">)</span></code></pre></figure>
+
+<p>Eventually you will have optimal yield of diglyceride to be 30%. You can <a href="http://yourdomain.com/assets/fmincon_post/fmincon_reactor_optimization.zip">find the Matlab codes here</a>.</p>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kehang Han blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Kehang Han blog</li>
+          <li><a href="mailto:hkh12@mit.edu">hkh12@mit.edu</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/KEHANG"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">KEHANG</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Kehang Han Blog. AI, Kinetics, and Energy.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
