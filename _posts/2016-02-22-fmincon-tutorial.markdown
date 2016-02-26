@@ -191,7 +191,7 @@ x0 = [1,300,4,1,6,1,1,1,1,1];
 [x,fval] = fmincon(@objFun, x0, [], [], [], [], [], [], @allcon)
 {% endhighlight %}
 
-Eventually you will have optimal yield of diglyceride to be 30%. You can [find the Matlab codes here]({{ site.url }}/assets/fmincon_post/fmincon_reactor_optimization.zip).
+Eventually you will have optimal yield of diglyceride to be 30%. You can [find the Matlab codes here]({{ site.github.url }}/assets/fmincon_post/fmincon_reactor_optimization.zip).
 
 [matlab-fmincon-tutorial]: http://www.mathworks.com/help/optim/ug/fmincon.html?refresh=true#busohxx-2
 
