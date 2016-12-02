@@ -7,7 +7,7 @@ categories: fun_project
 
 Early this year, my friends in [Machine Learning Study Group](http://hkh12.scripts.mit.edu/mlgp/mlgp.html) and I were learning natural language processing. To make the learning experience more interesting, we thought we could strike a real life project; three of us are online shoppers and all know the pain of scanning through lots of reviews before placing purchasement. What if there's a tool that can summarize all the thousands of reviews for us? So we started.
 
-Here I present our joint work **SRS**, which is to save us. By using Natural Language Processing and Machine Learning techniques, **SRS** is able to instantly help summarize customers' opinions on various aspects of a particular product. On top of that, it also enables users to compare sentiment scores for two similar products.
+Here I present our joint work **SRS**, [srs.mit.edu](http://srs.mit.edu), which is to save us. By using Natural Language Processing and Machine Learning techniques, **SRS** is able to instantly help summarize customers' opinions on various aspects of a particular product. On top of that, it also enables users to compare sentiment scores for two similar products.
 
 ## Workflow
 
