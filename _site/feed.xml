@@ -5,15 +5,295 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 21 Sep 2016 21:38:43 -0400</pubDate>
-    <lastBuildDate>Wed, 21 Sep 2016 21:38:43 -0400</lastBuildDate>
+    <pubDate>Sat, 01 Apr 2017 13:47:12 -0400</pubDate>
+    <lastBuildDate>Sat, 01 Apr 2017 13:47:12 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Install CUDA and cuDNN on Red Hat</title>
+        <description>&lt;p&gt;I’ve been building neural networks for my chemical space deep learning research since last year. Speedup of training is always one of the central topics. Recently my research group purchased a &lt;code class=&quot;highlighter-rouge&quot;&gt;Quadro K2200&lt;/code&gt; for our Red Hat workstation. I thought it’s a good opportunity of accelerating the computation by switching to GPU. The benefit detail for my research projects will probably be covered in later posts.&lt;/p&gt;
+
+&lt;p&gt;Today I’m going to focus on how to smoothly install the &lt;strong&gt;two important tools&lt;/strong&gt; for any neural network applications to run on GPUs: &lt;strong&gt;CUDA&lt;/strong&gt; and &lt;strong&gt;cuDNN&lt;/strong&gt;. I noticed there’s serveral installation guides online, e.g., &lt;a href=&quot;http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#axzz4cwRN8XWN&quot;&gt;NVIDIA official guide&lt;/a&gt;, &lt;a href=&quot;http://expressionflow.com/2016/10/09/installing-tensorflow-on-an-aws-ec2-p2-gpu-instance/&quot;&gt;AWS EC2 guide 1&lt;/a&gt; and &lt;a href=&quot;http://www.pyimagesearch.com/2016/07/04/how-to-install-cuda-toolkit-and-cudnn-for-deep-learning/&quot;&gt;AWS EC2 guide 2&lt;/a&gt;. They either are outdated, missing some key steps or contain unneccessary settings. More importantly for beginners, we want to have some tests to see each major step is gone though correctly and neccessarily.&lt;/p&gt;
+
+&lt;p&gt;For this purpose I decided to create this post, whose goal is to install CUDA and cuDNN on Red Hat Enterprise Linux 7 in a more &lt;strong&gt;transparent&lt;/strong&gt; and &lt;strong&gt;reasonable&lt;/strong&gt; way.&lt;/p&gt;
+
+&lt;p&gt;Just to emphasize, my situation was:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;I could easily install &lt;code class=&quot;highlighter-rouge&quot;&gt;theano&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;tensorflow&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;keras&lt;/code&gt; through &lt;code class=&quot;highlighter-rouge&quot;&gt;anaconda&lt;/code&gt; binary platform,&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;my application can already successfully run on CPUs,&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;I only need to make &lt;code class=&quot;highlighter-rouge&quot;&gt;theano&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;tensorflow&lt;/code&gt;/&lt;code class=&quot;highlighter-rouge&quot;&gt;keras&lt;/code&gt; detect there’s GPU available&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;test-examples-prep&quot;&gt;Test Examples Prep&lt;/h2&gt;
+
+&lt;p&gt;I prepared two python test scripts: &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; is from &lt;a href=&quot;http://deeplearning.net/software/theano/tutorial/using_gpu.html&quot;&gt;theano official documentation&lt;/a&gt;, which is easy and fast to test whether we have connected to GPU. &lt;code class=&quot;highlighter-rouge&quot;&gt;example_2&lt;/code&gt; is from &lt;a href=&quot;https://github.com/fchollet/keras/blob/master/examples/cifar10_cnn.py&quot;&gt;keras example cifar10_cnn&lt;/a&gt;, which will be used to final check the speedup brought by GPU. Below is the detail of &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; script.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;kn&quot;&gt;from&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;theano&lt;/span&gt; &lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tensor&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;time&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;vlen&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;768&lt;/span&gt;  &lt;span class=&quot;c&quot;&gt;# 10 x #cores x # threads per core&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;iters&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1000&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;rng&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numpy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;random&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;RandomState&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;22&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;shared&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;numpy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;asarray&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rng&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rand&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;vlen&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;config&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;floatX&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;function&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tensor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;exp&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;maker&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toposort&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;t0&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;i&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;range&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;r&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Looping &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;d times took &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;f seconds&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iters&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;t0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Result is &lt;/span&gt;&lt;span class=&quot;si&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;s&quot;&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;%&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;r&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,))&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;if&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;numpy&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;any&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;isinstance&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;op&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;tensor&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Elemwise&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;and&lt;/span&gt;
+              &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;Gpu&#39;&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;type&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;op&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__name__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+              &lt;span class=&quot;k&quot;&gt;for&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;in&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;f&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;maker&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fgraph&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;toposort&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()]):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;Used the cpu&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;else&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&#39;Used the gpu&#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;python-anaconda-environment-setup&quot;&gt;Python Anaconda Environment Setup&lt;/h2&gt;
+
+&lt;p&gt;One command can create a conda environment with: &lt;code class=&quot;highlighter-rouge&quot;&gt;theano&lt;/code&gt;. Just run on your terminal:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;conda create -n theano_test -c conda-forge theano&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h1 id=&quot;status-of-test-examples-able-to-run-on-cpus-but-not-gpus&quot;&gt;Status of test examples: able to run on CPUs but not GPUs&lt;/h1&gt;
+
+&lt;p&gt;At this point, we’ll run &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; script (no need to run &lt;code class=&quot;highlighter-rouge&quot;&gt;example_2&lt;/code&gt;) to make sure &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; can run on CPUs but not on GPUs.&lt;/p&gt;
+
+&lt;p&gt;Run &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; on CPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;theano_test&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;kehang]&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;python example_1.py&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Result of &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; for CPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Elemwise&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;exp,no_inplace&lt;span class=&quot;o&quot;&gt;}(&lt;/span&gt;&amp;lt;TensorType&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;float64, vector&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&amp;gt;&lt;span class=&quot;o&quot;&gt;)]&lt;/span&gt;
+Looping 1000 &lt;span class=&quot;nb&quot;&gt;times &lt;/span&gt;took 4.095498 seconds
+Result is &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; 1.23178032  1.61879341  1.52278065 ...,  2.20771815  2.29967753
+  1.62323285]
+Used the cpu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Run &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; on GPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;theano_test&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;kehang]&lt;span class=&quot;nv&quot;&gt;$ THEANO_FLAGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;cuda python example_1.py&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Result of &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; for GPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;ERROR &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;theano.gpuarray&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;: Could not initialize pygpu, support disabled
+Traceback &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;most recent call last&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;:
+  File &lt;span class=&quot;s2&quot;&gt;&quot;/home/kehang/miniconda/envs/keras_test/lib/python2.7/site-packages/theano/gpuarray/__init__.py&quot;&lt;/span&gt;, line 164, &lt;span class=&quot;k&quot;&gt;in&lt;/span&gt; &amp;lt;module&amp;gt;
+    use&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;config.device&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  File &lt;span class=&quot;s2&quot;&gt;&quot;/home/kehang/miniconda/envs/keras_test/lib/python2.7/site-packages/theano/gpuarray/__init__.py&quot;&lt;/span&gt;, line 151, &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;use
+    init_dev&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;device&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  File &lt;span class=&quot;s2&quot;&gt;&quot;/home/kehang/miniconda/envs/keras_test/lib/python2.7/site-packages/theano/gpuarray/__init__.py&quot;&lt;/span&gt;, line 60, &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;init_dev
+    &lt;span class=&quot;nv&quot;&gt;sched&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;config.gpuarray.sched&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  File &lt;span class=&quot;s2&quot;&gt;&quot;pygpu/gpuarray.pyx&quot;&lt;/span&gt;, line 614, &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;pygpu.gpuarray.init &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;pygpu/gpuarray.c:9415&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  File &lt;span class=&quot;s2&quot;&gt;&quot;pygpu/gpuarray.pyx&quot;&lt;/span&gt;, line 566, &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;pygpu.gpuarray.pygpu_init &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;pygpu/gpuarray.c:9106&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+  File &lt;span class=&quot;s2&quot;&gt;&quot;pygpu/gpuarray.pyx&quot;&lt;/span&gt;, line 1021, &lt;span class=&quot;k&quot;&gt;in &lt;/span&gt;pygpu.gpuarray.GpuContext.__cinit__ &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;pygpu/gpuarray.c:13468&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+GpuArrayException: Error loading library: -1
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;Elemwise&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;exp,no_inplace&lt;span class=&quot;o&quot;&gt;}(&lt;/span&gt;&amp;lt;TensorType&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;float64, vector&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;&amp;gt;&lt;span class=&quot;o&quot;&gt;)]&lt;/span&gt;
+Looping 1000 &lt;span class=&quot;nb&quot;&gt;times &lt;/span&gt;took 4.158732 seconds
+Result is &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; 1.23178032  1.61879341  1.52278065 ...,  2.20771815  2.29967753
+  1.62323285]
+Used the cpu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h2 id=&quot;installation-of-cuda-toolkit-and-driver&quot;&gt;Installation of CUDA Toolkit and Driver&lt;/h2&gt;
+
+&lt;p&gt;This part is well documented by &lt;a href=&quot;http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#axzz4cwRN8XWN&quot;&gt;NVIDIA official guide&lt;/a&gt; except that some small steps are either too brief (can be not so actionable) or outdated. This post will cover all the commands step by step in an actionable way, for detailed explanations one can always refer to the official guide.&lt;/p&gt;
+
+&lt;h1 id=&quot;pre-installation-actions&quot;&gt;Pre-installation Actions&lt;/h1&gt;
+
+&lt;p&gt;This step is 100% following &lt;a href=&quot;http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#pre-installation-actions&quot;&gt;NVIDIA official guide: Pre-installation Actions&lt;/a&gt;. First run the following commands to verify system requirements are met:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Verify You Have a CUDA-Capable GPU&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;lspci | grep -i nvidia
+
+&lt;span class=&quot;c&quot;&gt;# Verify You Have a Supported Version of Linux&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;uname -m &lt;span class=&quot;o&quot;&gt;&amp;amp;&amp;amp;&lt;/span&gt; cat /etc/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;release
+
+&lt;span class=&quot;c&quot;&gt;# Verify the System Has gcc Installed&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;gcc --version
+
+&lt;span class=&quot;c&quot;&gt;# Install Correct Kernel Headers and Development Packages for Red Hat&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;sudo yum install kernel-devel-&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;uname -r&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt; kernel-headers-&lt;span class=&quot;k&quot;&gt;$(&lt;/span&gt;uname -r&lt;span class=&quot;k&quot;&gt;)&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Now you go to &lt;a href=&quot;http://developer.nvidia.com/cuda-downloads&quot;&gt;NVIDIA CUDA Toolkit Downloads&lt;/a&gt;. Below is what I chose for my Red Hat EL7 machine. It’s a fresh installation so I didn’t have to deal with conflicting previous installations. But for people having previous CUDA installation, please refer to &lt;a href=&quot;http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#handle-uninstallation&quot;&gt;Handle Conflicting Installation Methods&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p class=&quot;cuda_cudnn_img&quot;&gt;&lt;img src=&quot;/assets/cuda_cudnn_post/img/cuda_download.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;package-manager-installation&quot;&gt;Package Manager Installation&lt;/h1&gt;
+
+&lt;p&gt;As I mentioned early, I chose to download the &lt;code class=&quot;highlighter-rouge&quot;&gt;rpm(local)&lt;/code&gt; installer option, so I need to use package manager installation. This step we’ll following 80% of the &lt;a href=&quot;http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#package-manager-installation&quot;&gt;NVIDIA official guide: Package Manager Installation&lt;/a&gt; and add/modify some steps I regard neccessary but not clear in the official guide.&lt;/p&gt;
+
+&lt;p&gt;For users choosing &lt;code class=&quot;highlighter-rouge&quot;&gt;runfile&lt;/code&gt;, please refer to &lt;a href=&quot;http://docs.nvidia.com/cuda/cuda-installation-guide-linux/index.html#runfile&quot;&gt;Runfile Installation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Add third-party repository EPEL to yum repolist&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;wget http://dl.fedoraproject.org/pub/epel/7/x86_64/e/epel-release-7-9.noarch.rpm
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;rpm -ivh epel-release-7-9.noarch.rpm
+
+&lt;span class=&quot;c&quot;&gt;# Verify you have EPEL now&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;yum repolist
+
+&lt;span class=&quot;c&quot;&gt;# Search in EPEL for dkms and libvdpau &lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# which are dependencies of CUDA&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;yum --enablerepo&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;epel info dkms
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;yum --enablerepo&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;epel info libvdpau
+
+&lt;span class=&quot;c&quot;&gt;# Address custom xorg.conf, if applicable&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# I don&#39;t have xorg.conf before so it&#39;s fine&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# if you have, please follow official guide&lt;/span&gt;
+
+&lt;span class=&quot;c&quot;&gt;# Install cuda finally&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# takes 10 mins or so&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;sudo rpm -i cuda-repo-rhel7-8-0-local-ga2-8.0.61-1.x86_64.rpm
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;sudo yum clean all
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;sudo yum install cuda&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h1 id=&quot;post-installation-actions&quot;&gt;Post-installation Actions&lt;/h1&gt;
+
+&lt;p&gt;You only need to add &lt;code class=&quot;highlighter-rouge&quot;&gt;/usr/local/cuda-8.0/bin&lt;/code&gt; (version number can vary, please check) to your &lt;code class=&quot;highlighter-rouge&quot;&gt;PATH&lt;/code&gt; environment variable (either by doing as in below or put into your &lt;code class=&quot;highlighter-rouge&quot;&gt;.bashrc&lt;/code&gt; file).&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/local/cuda-8.0/bin:&lt;span class=&quot;nv&quot;&gt;$PATH&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;To verify GPUs can be accessed, three small steps are needed&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;restart the machine&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;verify the driver version by running &lt;code class=&quot;highlighter-rouge&quot;&gt;cat /proc/driver/nvidia/version&lt;/code&gt;&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;run &lt;code class=&quot;highlighter-rouge&quot;&gt;deviceQuery&lt;/code&gt; cuda sample binary, in steps as follow&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# Copy CUDA samples to your personal directory&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# so that you have write permission&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;cuda-install-samples-8.0.sh &amp;lt;your-target-directory&amp;gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; &amp;lt;your-target-directory&amp;gt;/NVIDIA_CUDA-8.0_Samples
+
+&lt;span class=&quot;c&quot;&gt;# Compile samples&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;make
+
+&lt;span class=&quot;c&quot;&gt;# Running deviceQuery&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;bin/x86_64/linux/release
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;./deviceQuery&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Here’s what you’ll get after running &lt;code class=&quot;highlighter-rouge&quot;&gt;deviceQuery&lt;/code&gt;:&lt;/p&gt;
+
+&lt;p class=&quot;cuda_cudnn_img&quot;&gt;&lt;img src=&quot;/assets/cuda_cudnn_post/img/deviceQuery.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;h1 id=&quot;status-of-test-examples-able-to-run-on-gpus-but-cudnn-complaints&quot;&gt;Status of test examples: able to run on GPUs but cuDNN complaints&lt;/h1&gt;
+
+&lt;p&gt;Run &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; on GPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;theano_test&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;kehang]&lt;span class=&quot;nv&quot;&gt;$ THEANO_FLAGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;cuda python example_1.py&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Result of &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; for GPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;Can not use cuDNN on context None: cannot compile with cuDNN. We got this error:
+/usr/bin/ld: cannot find -lcudnn
+collect2: error: ld returned 1 &lt;span class=&quot;nb&quot;&gt;exit &lt;/span&gt;status
+
+Mapped name None to device cuda: Quadro K2200 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0000:03:00.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;GpuElemwise&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;exp,no_inplace&lt;span class=&quot;o&quot;&gt;}(&lt;/span&gt;&amp;lt;GpuArrayType&amp;lt;None&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;float64, &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;False,&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;&amp;gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, HostFromGpu&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;gpuarray&lt;span class=&quot;o&quot;&gt;)(&lt;/span&gt;GpuElemwise&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;exp,no_inplace&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;.0&lt;span class=&quot;o&quot;&gt;)]&lt;/span&gt;
+Looping 1000 &lt;span class=&quot;nb&quot;&gt;times &lt;/span&gt;took 0.535818 seconds
+Result is &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; 1.23178032  1.61879341  1.52278065 ...,  2.20771815  2.29967753
+  1.62323285]
+Used the gpu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Hooray! &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; is able to access to GPU &lt;code class=&quot;highlighter-rouge&quot;&gt;Quadro K2200&lt;/code&gt; and the wallclock has been reduced by a factor of 8 (from 4.15 sec to 0.53 sec.)&lt;/p&gt;
+
+&lt;p&gt;But also it shows that &lt;code class=&quot;highlighter-rouge&quot;&gt;cannot find -lcudnn&lt;/code&gt;, which will be our next installation part: &lt;strong&gt;cuDNN installation&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h2 id=&quot;installation-of-cudnn&quot;&gt;Installation of cuDNN&lt;/h2&gt;
+
+&lt;p&gt;This part of installation is relatively easy, and we’ll maily follow &lt;a href=&quot;http://www.pyimagesearch.com/2016/07/04/how-to-install-cuda-toolkit-and-cudnn-for-deep-learning/&quot;&gt;AWS EC2 guide 2&lt;/a&gt;. But still some steps of it need modified or better explained.&lt;/p&gt;
+
+&lt;h1 id=&quot;cudnn-download&quot;&gt;cuDNN Download&lt;/h1&gt;
+
+&lt;p&gt;To obtain the cuDNN library, one needs&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;create an account to join &lt;a href=&quot;https://developer.nvidia.com/accelerated-computing-developer&quot;&gt;NVIDIA developer program&lt;/a&gt;.&lt;/li&gt;
+  &lt;li&gt;download &lt;a href=&quot;https://developer.nvidia.com/rdp/cudnn-download&quot;&gt;cuDNN&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p class=&quot;cuda_cudnn_img&quot;&gt;&lt;img src=&quot;/assets/cuda_cudnn_post/img/cudnn_download.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;I chose &lt;strong&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;cuDNN Library v5.1 for Linux&lt;/code&gt;&lt;/strong&gt; not &lt;code class=&quot;highlighter-rouge&quot;&gt;v6.0&lt;/code&gt; is because latest &lt;code class=&quot;highlighter-rouge&quot;&gt;theano&lt;/code&gt; can only utilize up to &lt;code class=&quot;highlighter-rouge&quot;&gt;v5.1&lt;/code&gt; (&lt;code class=&quot;highlighter-rouge&quot;&gt;v6.0&lt;/code&gt; has a conflict with &lt;code class=&quot;highlighter-rouge&quot;&gt;theano&lt;/code&gt;, but maybe future &lt;code class=&quot;highlighter-rouge&quot;&gt;theano&lt;/code&gt; can cooperate)&lt;/p&gt;
+
+&lt;h1 id=&quot;cudnn-unpack-and-install&quot;&gt;cuDNN Unpack and Install&lt;/h1&gt;
+
+&lt;p&gt;Copy the download onto your machine, and unpack it&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;tar -zxf cudnn-8.0-linux-x64-v5.1.tgz&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Copy cuDNN header file and library files to appropriate &lt;code class=&quot;highlighter-rouge&quot;&gt;include&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;lib64&lt;/code&gt; directories.&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;c&quot;&gt;# change directory to the unpacked folder of cudnn&lt;/span&gt;
+&lt;span class=&quot;gp&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;cuda
+
+&lt;span class=&quot;c&quot;&gt;# copy related files to /usr/local/cuda/lib64 or /usr/local/cuda/include&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# -av will keep the symbolic links as is during copying&lt;/span&gt;
+sudo cp -av lib64/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; /usr/local/cuda/lib64/
+sudo cp -av include/&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; /usr/local/cuda/include/
+
+&lt;span class=&quot;c&quot;&gt;# Update your environment variables in bash session&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;# or put them in your .bashrc file&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;LD_LIBRARY_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/local/cuda/lib64/:&lt;span class=&quot;nv&quot;&gt;$LD_LIBRARY_PATH&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;export &lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;LIBRARY_PATH&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;/usr/local/cuda/lib64/:&lt;span class=&quot;nv&quot;&gt;$LIBRARY_PATH&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;h1 id=&quot;status-of-test-examples-run-on-gpus-without-any-complaints&quot;&gt;Status of test examples: run on GPUs without any complaints&lt;/h1&gt;
+&lt;p&gt;Run &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; on GPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;theano_test&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;kehang]&lt;span class=&quot;nv&quot;&gt;$ THEANO_FLAGS&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;nv&quot;&gt;device&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;cuda python example_1.py&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Result of &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; for GPU mode:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;Using cuDNN version 5110 on context None
+Mapped name None to device cuda: Quadro K2200 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0000:03:00.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;o&quot;&gt;[&lt;/span&gt;GpuElemwise&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;exp,no_inplace&lt;span class=&quot;o&quot;&gt;}(&lt;/span&gt;&amp;lt;GpuArrayType&amp;lt;None&amp;gt;&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;float64, &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;False,&lt;span class=&quot;o&quot;&gt;))&lt;/span&gt;&amp;gt;&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;, HostFromGpu&lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;gpuarray&lt;span class=&quot;o&quot;&gt;)(&lt;/span&gt;GpuElemwise&lt;span class=&quot;o&quot;&gt;{&lt;/span&gt;exp,no_inplace&lt;span class=&quot;o&quot;&gt;}&lt;/span&gt;.0&lt;span class=&quot;o&quot;&gt;)]&lt;/span&gt;
+Looping 1000 &lt;span class=&quot;nb&quot;&gt;times &lt;/span&gt;took 0.536293 seconds
+Result is &lt;span class=&quot;o&quot;&gt;[&lt;/span&gt; 1.23178032  1.61879341  1.52278065 ...,  2.20771815  2.29967753
+  1.62323285]
+Used the gpu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;Although &lt;code class=&quot;highlighter-rouge&quot;&gt;example_1&lt;/code&gt; doesn’t show time advantage of using &lt;code class=&quot;highlighter-rouge&quot;&gt;cuDNN&lt;/code&gt; but it clearly shows it’s using cuDNN smoothly.&lt;/p&gt;
+
+&lt;p&gt;For &lt;code class=&quot;highlighter-rouge&quot;&gt;example_2&lt;/code&gt;, which is a convolutional neural network application, it can run on GPUs as well (below right-corner video). After switching to GPUs, the training process is sppeded up by at least 6 times (from 291 sec/epoch to 45 sec/epoch, I guess you can immediately tell from the progress bar)&lt;/p&gt;
+
+&lt;iframe width=&quot;360&quot; height=&quot;215&quot; src=&quot;https://www.youtube.com/embed/14sQNwBFv9s&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;iframe width=&quot;360&quot; height=&quot;215&quot; src=&quot;https://www.youtube.com/embed/rO1qwGVB47w&quot; frameborder=&quot;0&quot; allowfullscreen=&quot;&quot;&gt;&lt;/iframe&gt;
+
+&lt;p&gt;But anyways, hope you can enjoy the installation guide of CUDA and cuDNN on Red Hat. You can leave your comments on Youtube if you have any questions or suggestions.&lt;/p&gt;
+
+</description>
+        <pubDate>Thu, 30 Mar 2017 23:39:51 -0400</pubDate>
+        <link>http://yourdomain.com/tools/2017/03/30/install-CUDA-cuDNN-on-Red-Hat/</link>
+        <guid isPermaLink="true">http://yourdomain.com/tools/2017/03/30/install-CUDA-cuDNN-on-Red-Hat/</guid>
+        
+        
+        <category>tools</category>
+        
+      </item>
     
       <item>
         <title>Smart Review Summarization Project</title>
         <description>&lt;p&gt;Early this year, my friends in &lt;a href=&quot;http://hkh12.scripts.mit.edu/mlgp/mlgp.html&quot;&gt;Machine Learning Study Group&lt;/a&gt; and I were learning natural language processing. To make the learning experience more interesting, we thought we could strike a real life project; three of us are online shoppers and all know the pain of scanning through lots of reviews before placing purchasement. What if there’s a tool that can summarize all the thousands of reviews for us? So we started.&lt;/p&gt;
 
-&lt;p&gt;Here I present our joint work &lt;strong&gt;SRS&lt;/strong&gt;, which is to save us. By using Natural Language Processing and Machine Learning techniques, &lt;strong&gt;SRS&lt;/strong&gt; is able to instantly help summarize customers’ opinions on various aspects of a particular product. On top of that, it also enables users to compare sentiment scores for two similar products.&lt;/p&gt;
+&lt;p&gt;Here I present our joint work &lt;strong&gt;SRS&lt;/strong&gt;, &lt;a href=&quot;http://srs.mit.edu&quot;&gt;srs.mit.edu&lt;/a&gt;, which is to save us. By using Natural Language Processing and Machine Learning techniques, &lt;strong&gt;SRS&lt;/strong&gt; is able to instantly help summarize customers’ opinions on various aspects of a particular product. On top of that, it also enables users to compare sentiment scores for two similar products.&lt;/p&gt;
 
 &lt;h2 id=&quot;workflow&quot;&gt;Workflow&lt;/h2&gt;
 
