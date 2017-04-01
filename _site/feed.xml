@@ -5,8 +5,8 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sat, 01 Apr 2017 13:47:12 -0400</pubDate>
-    <lastBuildDate>Sat, 01 Apr 2017 13:47:12 -0400</lastBuildDate>
+    <pubDate>Sat, 01 Apr 2017 14:16:09 -0400</pubDate>
+    <lastBuildDate>Sat, 01 Apr 2017 14:16:09 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -218,7 +218,7 @@ Used the gpu&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
 
 &lt;h2 id=&quot;installation-of-cudnn&quot;&gt;Installation of cuDNN&lt;/h2&gt;
 
-&lt;p&gt;This part of installation is relatively easy, and we’ll maily follow &lt;a href=&quot;http://www.pyimagesearch.com/2016/07/04/how-to-install-cuda-toolkit-and-cudnn-for-deep-learning/&quot;&gt;AWS EC2 guide 2&lt;/a&gt;. But still some steps of it need modified or better explained.&lt;/p&gt;
+&lt;p&gt;This part of installation is relatively easy, and we’ll mainly follow &lt;a href=&quot;http://www.pyimagesearch.com/2016/07/04/how-to-install-cuda-toolkit-and-cudnn-for-deep-learning/&quot;&gt;AWS EC2 guide 2&lt;/a&gt;. But still some steps of it need modified or better explained.&lt;/p&gt;
 
 &lt;h1 id=&quot;cudnn-download&quot;&gt;cuDNN Download&lt;/h1&gt;
 

@@ -222,7 +222,7 @@ But also it shows that `cannot find -lcudnn`, which will be our next installatio
 
 ## Installation of cuDNN
 
-This part of installation is relatively easy, and we'll maily follow [AWS EC2 guide 2](http://www.pyimagesearch.com/2016/07/04/how-to-install-cuda-toolkit-and-cudnn-for-deep-learning/). But still some steps of it need modified or better explained.
+This part of installation is relatively easy, and we'll mainly follow [AWS EC2 guide 2](http://www.pyimagesearch.com/2016/07/04/how-to-install-cuda-toolkit-and-cudnn-for-deep-learning/). But still some steps of it need modified or better explained.
 
 # cuDNN Download
 
