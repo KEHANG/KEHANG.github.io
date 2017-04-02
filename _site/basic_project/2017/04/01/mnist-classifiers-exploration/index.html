@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>6.036 Project#2: MNIST Classifiers</title>
+  <meta name="description" content="This project is about digit classification using the MNIST database. It contains 60,000 training digits and 10,000 testing digits. The goal is to practically...">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://yourdomain.com/basic_project/2017/04/01/mnist-classifiers-exploration/">
+  <link rel="alternate" type="application/rss+xml" title="Kehang Han blog" href="http://yourdomain.com/feed.xml">
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <a class="site-title" href="/">Kehang Han blog</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+          <a class="page-link" href="https://hkh12.scripts.mit.edu">Kehang's Home</a>
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+
+  <header class="post-header">
+    <h1 class="post-title" itemprop="name headline">6.036 Project#2: MNIST Classifiers</h1>
+    <p class="post-meta"><time datetime="2017-04-01T21:01:11-04:00" itemprop="datePublished">Apr 1, 2017</time></p>
+    <script src="http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+  </header>
+
+  <div class="post-content" itemprop="articleBody">
+    <p>This project is about digit classification using the <a href="http://yann.lecun.com/exdb/mnist/">MNIST database</a>. It contains 60,000 training digits and 10,000 testing digits. The goal is to practically explore differenet classifiers and evaluate their performances. The exploration ranges from simplest classifier, e.g.,linear regression with softmax for classification, to nerual networks.</p>
+
+<h3 id="classifier-1-multinomialsoftmax-regression">Classifier 1: Multinomial/Softmax Regression</h3>
+
+<h4 id="part-4-report-base-line-test-error">Part 4: report base-line test error</h4>
+
+<p>when <code class="highlighter-rouge">temperature parameter = 1</code>, the test error is 0.1005, implying the linear softmax regression model is able to recognize MNIST digits with around 90%.</p>
+
+<h4 id="part-5-explain-temperate-parameter-effects">Part 5: explain temperate parameter effects</h4>
+
+<p>Increasing temperature parameter would decrease the probability of a sample <script type="math/tex">x^{(i)}</script> being assigned a label that has a large <script type="math/tex">\theta</script>, and increase for labels with small <script type="math/tex">\theta</script>. The mathematic explanation is following:</p>
+
+<script type="math/tex; mode=display">P_j = \frac{exp(\theta_j x / \tau)}{\sum_k exp(\theta_k x / \tau)}</script>
+
+<script type="math/tex; mode=display">\frac{\partial log(P_j)}{\partial \tau} = \frac{1}{\tau^2} \Big[ \frac{\sum_k exp(\theta_k x / \tau) \theta_k x}{\sum_k exp(\theta_k x / \tau)} - \theta_j x \Big]</script>
+
+<p>The first term is the bracket is weighted average of <script type="math/tex">\theta x</script>, so if <script type="math/tex">\theta_j x</script> is large, the value of the brackect will be negative, leading to negative <script type="math/tex">\frac{\partial log(P_j)}{\partial \tau}</script>.</p>
+
+<p>For small <script type="math/tex">\theta_j</script>, <script type="math/tex">\theta_j x</script> is also small, we have positive <script type="math/tex">\frac{\partial log(P_j)}{\partial \tau}</script>.</p>
+
+<h4 id="part-6-temperate-parameter-effect-on-test-error">Part 6: temperate parameter effect on test error</h4>
+
+<p>During experimentation, we found the test error increases with temperature parameter as follows:</p>
+
+<p>when <code class="highlighter-rouge">temperature parameter = 0.5</code>, the test error is 0.084</p>
+
+<p>when <code class="highlighter-rouge">temperature parameter = 1.0</code>, the test error is 0.1005</p>
+
+<p>when <code class="highlighter-rouge">temperature parameter = 2.0</code>, the test error is 0.1261</p>
+
+<p>Since from Part 5 we know increasing temperature parameter makes probability of large-<script type="math/tex">\theta</script> label decrease and that of small-<script type="math/tex">\theta</script> label increase, the probability distribution becomes <strong>more uniform</strong> as temperature parameter icreases.</p>
+
+<h4 id="part-7-classify-digits-by-their-mod-3-values">Part 7: classify digits by their mod 3 values</h4>
+
+<p>Note: in this part we use <code class="highlighter-rouge">temperature parameter = 1.0</code>.</p>
+
+<p>The error rate of the new labels (mod 3) <code class="highlighter-rouge">testErrorMod3 = 0.0768</code>.</p>
+
+<p>The error rate of the original labels <code class="highlighter-rouge">testError = 0.1005</code>.</p>
+
+<p>The classification error decreases because those examples being classified correctly with original labels will continue being classified correctly with new labels, but those being classified wrongly originally will have a chance to be classified correctly with new labels.</p>
+
+<h4 id="part-8-re-train-and-classify-digits-by-their-mod-3-values">Part 8: re-train and classify digits by their mod 3 values</h4>
+
+<p>After re-training using the new labels (mod 3), <code class="highlighter-rouge">testErrorMod3 = 0.1872</code>.</p>
+
+<h4 id="part-9-explain-test-error-difference-between-part-7-and-8">Part 9: explain test error difference between Part 7 and 8</h4>
+
+<p>Compared with <code class="highlighter-rouge">testErrorMod3 = 0.0768</code> in Part 7, re-training makes the test accuracy worse. It is because now in training step, the algorithm has <strong>less information</strong> (very different digits may have same mod 3 labels) with new labels compared with training using 0-9 digit labels.</p>
+
+<h3 id="classification-using-manually-crafted-features">Classification using manually-crafted features</h3>
+
+<p>This section we explore one dimensionality reduction approach: PCA and one dimensionality increase approach: polynomial (specifically <code class="highlighter-rouge">cubic</code> version) feature mapping, to see their effects on test error rates.</p>
+
+<h4 id="part-3-report-pca-test-error">Part 3: report PCA test error</h4>
+
+<p>When we use dimensionality reduction by applying PCA with 18 principal components, the <code class="highlighter-rouge">test error = 0.1483</code>. This error rate is very similar to the original <code class="highlighter-rouge">d=784</code> case. It is because PCA ensures these 18 feature values capture the maximal amount of variation in the original 784-denmensional data.</p>
+
+<h4 id="part-4-first-2-principal-components-visualization">Part 4: first 2 principal components visualization</h4>
+
+<p>Below is the visualization of the first 2 pricipal components of 100 training data points.</p>
+
+<p class="mnist_img"><img src="/assets/mnist_post/img/plotPC_P2p4.png" alt="Alt text" /></p>
+
+<h4 id="part-5-image-reconstruction-from-pca-representations">Part 5: image reconstruction from PCA-representations</h4>
+
+<p>Below are the reconstructions of the first two MNIST images fron their 18-dimensional PCA-representations alongside the originals.</p>
+
+<p><strong>MNIST 1st Image</strong> (left: reconstructed, right: original)</p>
+
+<p><img src="/assets/mnist_post/img/image_x_first_img_recon.png" alt="Alt text" height="300px" width="360px" /> <img src="/assets/mnist_post/img/image_x_first_img.png" alt="Alt text" height="300px" width="360px" /></p>
+
+<p><strong>MNIST 2nd Image</strong> (left: reconstructed, right: original)</p>
+
+<p><img src="/assets/mnist_post/img/image_x_second_img_recon.png" alt="Alt text" height="300px" width="360px" /> <img src="/assets/mnist_post/img/image_x_second_img.png" alt="Alt text" height="300px" width="360px" /></p>
+
+<h4 id="part-6-explicit-cubic-feature-mapping-for-2-dimensional-case">Part 6: explicit cubic feature mapping for 2-dimensional case</h4>
+
+<p>For <script type="math/tex">x = [x_1, x_2]</script> and <script type="math/tex">\phi(x)^T \phi(x') = (x^T x' + 1)^3</script>, we expand and get</p>
+
+<script type="math/tex; mode=display">\phi(x)^T \phi(x') = x_1^3{x_1'}^3 + x_2^3{x_2'}^3 + 3 x_1^2{x_1'}^2 x_2 {x_2'} + 3 x_1{x_1'} x_2^2 {x_2'}^2</script>
+
+<script type="math/tex; mode=display">+ 3 x_1^2{x_1'}^2 + 3 x_2^2{x_2'}^2 + 6 x_1{x_1'} x_2 {x_2'} + 3 x_1 {x_1'} + 3 x_2{x_2'} + 1</script>
+
+<p>So the corresponding feature vector is</p>
+
+<script type="math/tex; mode=display">\phi(x) = (x_1^3, x_2^3, \sqrt{3} x_1^2 x_2, \sqrt{3} x_1 x_2^2, \sqrt{3} x_1^2, \sqrt{3} x_2^2, \sqrt{6} x_1 x_2, \sqrt{3} x_1, \sqrt{3} x_1, 1)^T</script>
+
+<h4 id="part-7-re-train-using-cubic-feature-mapping">Part 7: re-train using cubic feature mapping</h4>
+
+<p>For practical reason, we apply the feature mapping to 10-dimensional PCA representation instead of original 784-dimensional data.</p>
+
+<p>With same settings as base-line case (e.g., temperature parameter = 1), the <code class="highlighter-rouge">test error = 0.0865</code>.</p>
+
+
+  </div>
+
+</article>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <h2 class="footer-heading">Kehang Han blog</h2>
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col footer-col-1">
+        <ul class="contact-list">
+          <li>Kehang Han blog</li>
+          <li><a href="mailto:hkh12@mit.edu">hkh12@mit.edu</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/KEHANG"><span class="icon icon--github"><svg viewBox="0 0 16 16"><path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/></svg>
+</span><span class="username">KEHANG</span></a>
+
+          </li>
+          
+
+          
+        </ul>
+      </div>
+
+      <div class="footer-col footer-col-3">
+        <p>Kehang Han Blog. AI, Kinetics, and Energy.</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>
