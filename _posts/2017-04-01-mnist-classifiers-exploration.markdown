@@ -11,7 +11,7 @@ This report will be available online after due date at:
 
 `http://kehang.github.io/basic_project/2017/04/01/mnist-classifiers-exploration/` 
 
-for people (including graders) to review.
+for people (including graders) to review. After grading, the post will be modified to be a standalone report with more background.
 
 ### 1. Multinomial/Softmax Regression
 
