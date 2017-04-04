@@ -5,15 +5,21 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 02 Apr 2017 16:31:15 -0400</pubDate>
-    <lastBuildDate>Sun, 02 Apr 2017 16:31:15 -0400</lastBuildDate>
+    <pubDate>Mon, 03 Apr 2017 23:40:37 -0400</pubDate>
+    <lastBuildDate>Mon, 03 Apr 2017 23:40:37 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
-        <title>6.036 Project#2: MNIST Classifiers</title>
-        <description>&lt;p&gt;This project is about digit classification using the &lt;a href=&quot;http://yann.lecun.com/exdb/mnist/&quot;&gt;MNIST database&lt;/a&gt;. It contains 60,000 training digits and 10,000 testing digits. The goal is to practically explore differenet classifiers and evaluate their performances. The exploration ranges from simplest classifier, e.g.,linear regression with softmax for classification, to nerual networks.&lt;/p&gt;
+        <title>6.036 Project 2: MNIST Classifiers</title>
+        <description>&lt;p&gt;This project is about digit classification using the &lt;a href=&quot;http://yann.lecun.com/exdb/mnist/&quot;&gt;MNIST database&lt;/a&gt;. It contains 60,000 training digits and 10,000 testing digits. The goal is to practically explore differenet classifiers and evaluate their performances. The exploration ranges from simplest classifier, e.g.,linear regression with softmax for classification, to deep nerual networks.&lt;/p&gt;
 
-&lt;h3 id=&quot;classifier-1-multinomialsoftmax-regression&quot;&gt;Classifier 1: Multinomial/Softmax Regression&lt;/h3&gt;
+&lt;p&gt;This report will be available online after due date at:&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;http://kehang.github.io/basic_project/2017/04/01/mnist-classifiers-exploration/&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;for people (including graders) to review.&lt;/p&gt;
+
+&lt;h3 id=&quot;multinomialsoftmax-regression&quot;&gt;1. Multinomial/Softmax Regression&lt;/h3&gt;
 
 &lt;h4 id=&quot;part-4-report-base-line-test-error&quot;&gt;Part 4: report base-line test error&lt;/h4&gt;
 
@@ -61,7 +67,7 @@
 
 &lt;p&gt;Compared with &lt;code class=&quot;highlighter-rouge&quot;&gt;testErrorMod3 = 0.0768&lt;/code&gt; in Part 7, re-training makes the test accuracy worse. It is because now in training step, the algorithm has &lt;strong&gt;less information&lt;/strong&gt; (very different digits may have same mod 3 labels) with new labels compared with training using 0-9 digit labels.&lt;/p&gt;
 
-&lt;h3 id=&quot;classification-using-manually-crafted-features&quot;&gt;Classification using manually-crafted features&lt;/h3&gt;
+&lt;h3 id=&quot;classification-using-manually-crafted-features&quot;&gt;2. Classification using manually-crafted features&lt;/h3&gt;
 
 &lt;p&gt;This section we explore one dimensionality reduction approach: PCA and one dimensionality increase approach: polynomial (specifically &lt;code class=&quot;highlighter-rouge&quot;&gt;cubic&lt;/code&gt; version) feature mapping, to see their effects on test error rates.&lt;/p&gt;
 
@@ -104,6 +110,188 @@
 &lt;p&gt;For practical reason, we apply the feature mapping to 10-dimensional PCA representation instead of original 784-dimensional data.&lt;/p&gt;
 
 &lt;p&gt;With same settings as base-line case (e.g., temperature parameter = 1), the &lt;code class=&quot;highlighter-rouge&quot;&gt;test error = 0.0865&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;basic-neural-network&quot;&gt;3. Basic Neural Network&lt;/h3&gt;
+
+&lt;h4 id=&quot;part-4-improve-learning-rate&quot;&gt;Part 4: improve learning rate&lt;/h4&gt;
+
+&lt;p&gt;Since currently we have constant learning rate, which is not best when approaching the minimum, one way we can do is to reduce learning rate gradually by expressing it as a function of iterations.&lt;/p&gt;
+
+&lt;h4 id=&quot;part-5-too-many-hidden-units&quot;&gt;Part 5: too many hidden units&lt;/h4&gt;
+
+&lt;p&gt;The danger would be overfitting.&lt;/p&gt;
+
+&lt;h4 id=&quot;part-6-training-and-test-error-evolution-against-epochs&quot;&gt;Part 6: training and test error evolution against epochs&lt;/h4&gt;
+
+&lt;p&gt;For training error, it will continue going down with epochs, while for test error, it will first go down and then go up.&lt;/p&gt;
+
+&lt;h4 id=&quot;part-7-optimize-the-number-of-epochs&quot;&gt;Part 7: optimize the number of epochs&lt;/h4&gt;
+
+&lt;p&gt;One way to do is use portion of training data (maybe 10%) as inner validation data, for each epoch we evaluate the inner validation error, if it starts going up consecutively for say, 10 epochs, we stop the training process.&lt;/p&gt;
+
+&lt;h3 id=&quot;deep-neural-networks&quot;&gt;4. Deep Neural Networks&lt;/h3&gt;
+
+&lt;h4 id=&quot;part-1-fully-connected-neural-networks&quot;&gt;Part 1: fully-connected neural networks&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;(a)&lt;/strong&gt; after 10 epochs, the &lt;code class=&quot;highlighter-rouge&quot;&gt;test accuracy = 0.9172&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;(b)&lt;/strong&gt; My final model architecture (&lt;code class=&quot;highlighter-rouge&quot;&gt;mnist_nnet_fc_improved.py&lt;/code&gt;) has &lt;strong&gt;6 hidden layers&lt;/strong&gt; (each has 512 neurons, activation is &lt;code class=&quot;highlighter-rouge&quot;&gt;ReLU&lt;/code&gt;) and 1 output layer (with 10 neurons, activation is &lt;code class=&quot;highlighter-rouge&quot;&gt;softmax&lt;/code&gt;). Optimizer is &lt;code class=&quot;highlighter-rouge&quot;&gt;SGD(lr=0.03, momentum=0.65, decay=0.0001)&lt;/code&gt;. With this architecture, the &lt;code class=&quot;highlighter-rouge&quot;&gt;test accuracy = 0.9842&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Among all the tweaks I’ve tried, increasing the &lt;strong&gt;number of hidden layers&lt;/strong&gt; (from 1 hidden layer to 6), the &lt;strong&gt;number of neurons&lt;/strong&gt; (from 128 to 512), the &lt;strong&gt;learning rate&lt;/strong&gt; (from 0.001 to 0.03, I also modified momentum and decay) help a lot, boosting the test accuracy from &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9172 to 0.9842&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Changing hidden layer activation from &lt;code class=&quot;highlighter-rouge&quot;&gt;ReLU&lt;/code&gt; to &lt;code class=&quot;highlighter-rouge&quot;&gt;tanh&lt;/code&gt; doesn’t make too much difference, but switching to &lt;code class=&quot;highlighter-rouge&quot;&gt;signmoid&lt;/code&gt; really harms test accuracy. Too high or too low decay in learning rate also can damage the accuracy; I believe current choice of decay of 0.0001 is the sweet spot.&lt;/p&gt;
+
+&lt;h4 id=&quot;part-2-convolutional-neural-networks&quot;&gt;Part 2: Convolutional neural networks&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;(a)&lt;/strong&gt; A simplest convolutional neural network was constructed in the following order:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;A 2D convolutional layer with 32 filters of size 3x3&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A ReLU activation&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A max pooling layer with size 2x2&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A ReLU activation&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A 2D convolutional layer with 64 filters of size 3x3&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A ReLU activation&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A max pooling layer with size 2x2&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A flatten layer&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A fully connected layer with 128 neurons&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A dropout layer with drop probability 0.5&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A fully connected layer with 10 neurons&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;A softmax activation&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The implementation using &lt;code class=&quot;highlighter-rouge&quot;&gt;keras&lt;/code&gt; is list below:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;Sequential&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Conv2D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;32&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernel_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;input_shape&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X_train&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;X_train&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Activation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;relu&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxPooling2D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pool_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Conv2D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;filters&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;64&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;kernel_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Activation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;relu&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;MaxPooling2D&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pool_size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Flatten&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;())&lt;/span&gt; 
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dense&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;128&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dropout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;rate&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Dense&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;units&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;=&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;model&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Activation&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;softmax&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;The result is quite encouraging, just one epoch, the &lt;code class=&quot;highlighter-rouge&quot;&gt;test accuracy&lt;/code&gt; reaches &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9810&lt;/code&gt;. But it does take longer to finish one epoch (48 secs, while 4 secs for the Part 1 fully-connected neural networks).&lt;/p&gt;
+
+&lt;p&gt;To speedup the training time and achieve higher &lt;code class=&quot;highlighter-rouge&quot;&gt;test accuracy&lt;/code&gt;, I set up &lt;a href=&quot;/tools/2017/03/30/install-CUDA-cuDNN-on-Red-Hat/&quot;&gt;CUDA drivers in a accessible GPU&lt;/a&gt; and ran the same ConvNN for &lt;code class=&quot;highlighter-rouge&quot;&gt;15 epochs&lt;/code&gt;. Here’s the training log from GPU:&lt;/p&gt;
+
+&lt;figure class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;Using Theano backend.
+Using cuDNN version 5110 on context None
+Mapped name None to device cuda: Quadro K2200 &lt;span class=&quot;o&quot;&gt;(&lt;/span&gt;0000:03:00.0&lt;span class=&quot;o&quot;&gt;)&lt;/span&gt;
+Train on 54000 samples, validate on 6000 samples
+Epoch 1/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.2062 - acc: 0.9346 - val_loss: 0.0555 - val_acc: 0.9822
+Epoch 2/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.0771 - acc: 0.9771 - val_loss: 0.0408 - val_acc: 0.9878
+Epoch 3/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.0577 - acc: 0.9820 - val_loss: 0.0351 - val_acc: 0.9887
+......
+Epoch 12/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.0193 - acc: 0.9934 - val_loss: 0.0346 - val_acc: 0.9912
+Epoch 13/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.0174 - acc: 0.9944 - val_loss: 0.0317 - val_acc: 0.9912
+Epoch 14/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.0157 - acc: 0.9945 - val_loss: 0.0345 - val_acc: 0.9912
+Epoch 15/15
+54000/54000 &lt;span class=&quot;o&quot;&gt;[================]&lt;/span&gt; - 6s - loss: 0.0151 - acc: 0.9948 - val_loss: 0.0348 - val_acc: 0.9905
+ 8832/10000 &lt;span class=&quot;o&quot;&gt;[===========&lt;/span&gt;&amp;gt;....] - ETA: 0sLoss on &lt;span class=&quot;nb&quot;&gt;test set&lt;/span&gt;:0.0324026019065 Accuracy on &lt;span class=&quot;nb&quot;&gt;test set&lt;/span&gt;: 0.9902&lt;/code&gt;&lt;/pre&gt;&lt;/figure&gt;
+
+&lt;p&gt;It achieves &lt;code class=&quot;highlighter-rouge&quot;&gt;99.02%&lt;/code&gt; of test accuracy after 15 epochs, and each epoch takes only &lt;code class=&quot;highlighter-rouge&quot;&gt;6 secs&lt;/code&gt;.&lt;/p&gt;
+
+&lt;h3 id=&quot;classification-for-overlapping-multi-digit-mnist&quot;&gt;5. Classification for overlapping multi-digit MNIST&lt;/h3&gt;
+
+&lt;h4 id=&quot;pre-step-data-representation-and-model-arguments&quot;&gt;Pre-step: data representation and model arguments&lt;/h4&gt;
+
+&lt;p&gt;Training set has 40,000 examples, each example is 42x28 size image, which has two labels indicating two overlapping digits in the image. Each label is a vector of length 10.&lt;/p&gt;
+
+&lt;p&gt;Testing set has 4,000 examples, each example is also 42x28 size image, which also has two labels indicating two overlapping digits in the image. Each label is a vector of length 10.&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;y_train[0]&lt;/code&gt; is the fisrt digits in the training images, while &lt;code class=&quot;highlighter-rouge&quot;&gt;y_train[1]&lt;/code&gt; is the second.&lt;/p&gt;
+
+&lt;p&gt;For &lt;code class=&quot;highlighter-rouge&quot;&gt;model.compile&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;loss=&#39;categorical_crossentropy&#39;&lt;/code&gt; means the loss function type is cross entropy function for both outputs, &lt;code class=&quot;highlighter-rouge&quot;&gt;optimizer=&#39;sgd&#39;&lt;/code&gt; means algorithm is using stochastic gradient descent method to learn, &lt;code class=&quot;highlighter-rouge&quot;&gt;metrics=[&#39;accuracy&#39;]&lt;/code&gt; means accuracy is used as metric, and &lt;code class=&quot;highlighter-rouge&quot;&gt;loss_weights=[0.5, 0.5]&lt;/code&gt; means the two labels are equally treated when calculating loss.&lt;/p&gt;
+
+&lt;p&gt;For &lt;code class=&quot;highlighter-rouge&quot;&gt;model.fit&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;X_train, [y_train[0], y_train[1]]&lt;/code&gt; are the training data and their labels, &lt;code class=&quot;highlighter-rouge&quot;&gt;epochs=nb_epoch&lt;/code&gt; means total epochs for training, &lt;code class=&quot;highlighter-rouge&quot;&gt;batch_size=batch_size&lt;/code&gt; means training is using mini-batch gradient descent approach, and &lt;code class=&quot;highlighter-rouge&quot;&gt;verbose=1&lt;/code&gt; is setting the logging verbosity.&lt;/p&gt;
+
+&lt;h4 id=&quot;five-explored-models&quot;&gt;Five explored models&lt;/h4&gt;
+
+&lt;p&gt;&lt;strong&gt;model1: mlp&lt;/strong&gt; (coded in &lt;code class=&quot;highlighter-rouge&quot;&gt;mlp.py&lt;/code&gt;)&lt;/p&gt;
+
+&lt;p&gt;The architecture is shown below, with one hidden layer of 64 neurons (&lt;code class=&quot;highlighter-rouge&quot;&gt;relu&lt;/code&gt; activation).&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/mnist_post/img/mlp.png&quot; alt=&quot;Alt text&quot; height=&quot;250px&quot; width=&quot;230px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After training 30 epochs, the test accuracy for &lt;code class=&quot;highlighter-rouge&quot;&gt;1st label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9378&lt;/code&gt;, for &lt;code class=&quot;highlighter-rouge&quot;&gt;2nd label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9278&lt;/code&gt;.
+Total training time is 3 secs/epoch, total 90 secs (run on NVIDIA Quadro K2200 GPU, same for all the other four models).&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;model2: mlp2&lt;/strong&gt; (coded in &lt;code class=&quot;highlighter-rouge&quot;&gt;mlp2.py&lt;/code&gt;)&lt;/p&gt;
+
+&lt;p&gt;The architecture is shown below, with &lt;code class=&quot;highlighter-rouge&quot;&gt;6 hidden layer&lt;/code&gt; of 64 neurons (&lt;code class=&quot;highlighter-rouge&quot;&gt;relu&lt;/code&gt; activation).&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/mnist_post/img/mlp2.png&quot; alt=&quot;Alt text&quot; height=&quot;420px&quot; width=&quot;180px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After training 30 epochs, the test accuracy for &lt;code class=&quot;highlighter-rouge&quot;&gt;1st label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9503&lt;/code&gt;, for &lt;code class=&quot;highlighter-rouge&quot;&gt;2nd label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9429&lt;/code&gt;.
+Total training time is 4 secs/epoch, total 120 secs.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;model3: conv&lt;/strong&gt; (coded in &lt;code class=&quot;highlighter-rouge&quot;&gt;conv.py&lt;/code&gt;)&lt;/p&gt;
+
+&lt;p&gt;The architecture is shown below. The first &lt;code class=&quot;highlighter-rouge&quot;&gt;Conv2D&lt;/code&gt; has 8 filters, and second has 16 filters. &lt;code class=&quot;highlighter-rouge&quot;&gt;SGD&lt;/code&gt; is the optimizer.&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/mnist_post/img/conv.png&quot; alt=&quot;Alt text&quot; height=&quot;420px&quot; width=&quot;200px&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;After training 15 epochs, the test accuracy for &lt;code class=&quot;highlighter-rouge&quot;&gt;1st label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9828&lt;/code&gt;, for &lt;code class=&quot;highlighter-rouge&quot;&gt;2nd label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9755&lt;/code&gt;.
+Total training time is 14 secs/epoch, total 210 secs.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;model4: conv2&lt;/strong&gt; (coded in &lt;code class=&quot;highlighter-rouge&quot;&gt;conv2.py&lt;/code&gt;)&lt;/p&gt;
+
+&lt;p&gt;The architecture is exactly same as model &lt;code class=&quot;highlighter-rouge&quot;&gt;conv&lt;/code&gt;. The difference is &lt;code class=&quot;highlighter-rouge&quot;&gt;adam&lt;/code&gt; is the optimizer.&lt;/p&gt;
+
+&lt;p&gt;After training 15 epochs, the test accuracy for &lt;code class=&quot;highlighter-rouge&quot;&gt;1st label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9869&lt;/code&gt;, for &lt;code class=&quot;highlighter-rouge&quot;&gt;2nd label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9822&lt;/code&gt;.
+Total training time is 14 secs/epoch, total 210 secs.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;model5: conv3&lt;/strong&gt; (coded in &lt;code class=&quot;highlighter-rouge&quot;&gt;conv3.py&lt;/code&gt;)&lt;/p&gt;
+
+&lt;p&gt;The architecture is exactly same as model &lt;code class=&quot;highlighter-rouge&quot;&gt;conv&lt;/code&gt;. The difference is that the first &lt;code class=&quot;highlighter-rouge&quot;&gt;Conv2D&lt;/code&gt; has 32 filters, and second has 64 filters&lt;/p&gt;
+
+&lt;p&gt;After training 15 epochs, the test accuracy for &lt;code class=&quot;highlighter-rouge&quot;&gt;1st label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9890&lt;/code&gt;, for &lt;code class=&quot;highlighter-rouge&quot;&gt;2nd label&lt;/code&gt; is &lt;code class=&quot;highlighter-rouge&quot;&gt;0.9869&lt;/code&gt;.
+Total training time is 39 secs/epoch, total 585 secs.&lt;/p&gt;
+
+&lt;h4 id=&quot;thoughts-on-model-selection&quot;&gt;Thoughts on model selection&lt;/h4&gt;
+
+&lt;p&gt;It seems that convolutional neural networks are more effective in learning images than fully connected neural networks. Model &lt;code class=&quot;highlighter-rouge&quot;&gt;mlp&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;mlp2&lt;/code&gt; can only achieve test accuracy around &lt;code class=&quot;highlighter-rouge&quot;&gt;0.95&lt;/code&gt;, while &lt;code class=&quot;highlighter-rouge&quot;&gt;conv&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;conv2&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;conv3&lt;/code&gt; can easily achieve beyond &lt;code class=&quot;highlighter-rouge&quot;&gt;0.98&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;For fully connected neural networks, adding more hidden layers seems helpful at least from 1 hidden layer to 6 hidden layers.&lt;/p&gt;
+
+&lt;p&gt;Sometime optimizer can make a difference as well, e.g., here using &lt;code class=&quot;highlighter-rouge&quot;&gt;adam&lt;/code&gt; optimizer is more effective than &lt;code class=&quot;highlighter-rouge&quot;&gt;SGD&lt;/code&gt; to reach minimum.&lt;/p&gt;
 
 </description>
         <pubDate>Sat, 01 Apr 2017 21:01:11 -0400</pubDate>
