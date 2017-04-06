@@ -7,9 +7,7 @@ categories: basic_project
 
 This project is about digit classification using the [MNIST database](http://yann.lecun.com/exdb/mnist/). It contains 60,000 training digits and 10,000 testing digits. The goal is to practically explore differenet classifiers and evaluate their performances. The exploration ranges from simplest classifier, e.g.,linear regression with softmax for classification, to deep nerual networks.
 
-This report will be available online after due date at: 
-
-`http://kehang.github.io/basic_project/2017/04/01/mnist-classifiers-exploration/` 
+This report will be available online after due date at: `http://kehang.github.io/` 
 
 for people (including graders) to review. After grading, the post will be modified to be a standalone report with more background.
 
