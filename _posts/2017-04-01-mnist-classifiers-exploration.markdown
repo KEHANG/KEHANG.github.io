@@ -11,6 +11,18 @@ This report will be available online after due date at: `http://kehang.github.io
 
 for people (including graders) to review. After grading, the post will be modified to be a standalone report with more background.
 
+Package specifications for this project:
+
+- OS: Mac
+
+- python: 3.6.0
+
+- keras: 2.0.2
+
+- backend of keras: theano
+
+- theano: 0.9.0
+
 ### 1. Multinomial/Softmax Regression
 
 #### Part 4: report base-line test error

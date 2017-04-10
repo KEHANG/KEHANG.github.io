@@ -5,8 +5,8 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Thu, 06 Apr 2017 09:28:56 -0400</pubDate>
-    <lastBuildDate>Thu, 06 Apr 2017 09:28:56 -0400</lastBuildDate>
+    <pubDate>Sun, 09 Apr 2017 22:26:09 -0400</pubDate>
+    <lastBuildDate>Sun, 09 Apr 2017 22:26:09 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -16,6 +16,26 @@
 &lt;p&gt;This report will be available online after due date at: &lt;code class=&quot;highlighter-rouge&quot;&gt;http://kehang.github.io/&lt;/code&gt;&lt;/p&gt;
 
 &lt;p&gt;for people (including graders) to review. After grading, the post will be modified to be a standalone report with more background.&lt;/p&gt;
+
+&lt;p&gt;Package specifications for this project:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;OS: Mac&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;python: 3.6.0&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;keras: 2.0.2&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;backend of keras: theano&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;theano: 0.9.0&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
 
 &lt;h3 id=&quot;multinomialsoftmax-regression&quot;&gt;1. Multinomial/Softmax Regression&lt;/h3&gt;
 
