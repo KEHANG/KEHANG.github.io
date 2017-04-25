@@ -5,9 +5,184 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Sun, 09 Apr 2017 22:26:09 -0400</pubDate>
-    <lastBuildDate>Sun, 09 Apr 2017 22:26:09 -0400</lastBuildDate>
+    <pubDate>Mon, 24 Apr 2017 19:56:02 -0400</pubDate>
+    <lastBuildDate>Mon, 24 Apr 2017 19:56:02 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
+    
+      <item>
+        <title>Molecular ConvNet in Property Prediction</title>
+        <description>&lt;p&gt;In chemistry discovery, we try to explore &lt;strong&gt;vast, unknown chemical space&lt;/strong&gt; (molecules and reactions) and discover most essential chemistry for specific chemical systems. By doing that, we are able to &lt;strong&gt;purposefully create&lt;/strong&gt; valuable applications such as optimizing fuel-additive ratio for engine combustion, new drug discovery for certain types of dieseas, etc. In order to &lt;strong&gt;automate&lt;/strong&gt; the discovery process, we’ve developed an open source project &lt;a href=&quot;https://github.com/ReactionMechanismGenerator/RMG-Py&quot;&gt;RMG-Py&lt;/a&gt;, of which some useful tools are available in &lt;a href=&quot;http://rmg.mit.edu/&quot;&gt;RMG-website&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/HXD13flux-small.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;In that process, one of the most challenging problems is to &lt;strong&gt;predict thermodynamic properties&lt;/strong&gt; (e.g., enthalpy, entropy, heat capacities) for &lt;strong&gt;any&lt;/strong&gt; molecules in the chemical space, of which most we may have &lt;strong&gt;never seen before&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;In machine learning language, molecular prediction research is essentially answer how to smartly &lt;strong&gt;map&lt;/strong&gt; a molecule, regarded as &lt;strong&gt;a node-edge graph&lt;/strong&gt;, to &lt;strong&gt;a feature vector&lt;/strong&gt; and then design appropriate regression model to get to molecular property.&lt;/p&gt;
+
+&lt;p&gt;This post reviews several traditional approaches (used as base-line models) and  propose a new solution using &lt;strong&gt;Molecular Convolutional Neural Networks&lt;/strong&gt;, which boosts prediction performance remarkably.&lt;/p&gt;
+
+&lt;h3 id=&quot;datasets&quot;&gt;0. Datasets&lt;/h3&gt;
+
+&lt;p&gt;The datasets we are using are crafted originally from a large quantum-mechanics calculation dataset named &lt;a href=&quot;https://www.nature.com/articles/sdata201422&quot;&gt;ScientificData-134k&lt;/a&gt; (thereafter &lt;code class=&quot;highlighter-rouge&quot;&gt;sdata134k&lt;/code&gt;) by Ramakrishnan. Since the most difficult-to-predict molecules always involves cyclic structures, this post gathers all cyclic molecules from sdata134k and categorizes them into into &lt;strong&gt;hydrocarbon cyclics&lt;/strong&gt; and &lt;strong&gt;oxygen-contained cyclics&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;h4 id=&quot;dataset-1-sdata134k-hydrocarbon-cyclic-examples&quot;&gt;Dataset 1: sdata134k-hydrocarbon-cyclic examples&lt;/h4&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/dataset_example.png&quot; alt=&quot;Alt text&quot; height=&quot;250px&quot; width=&quot;280px&quot; /&gt;&lt;/p&gt;
+
+&lt;h4 id=&quot;dataset-2-sdata134k-oxygenate-cyclic-examples&quot;&gt;Dataset 2: sdata134k-oxygenate-cyclic examples&lt;/h4&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/oxy_dataset_example.png&quot; alt=&quot;Alt text&quot; height=&quot;250px&quot; width=&quot;280px&quot; /&gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;base-line-models&quot;&gt;1. Base-line models&lt;/h3&gt;
+
+&lt;p&gt;The traditional approaches that will be covered and used as base-line models includes&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Linear model: Group additivity method&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Molecular fingerprint with neural netoworks&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;base-line-model-1-group-addtivity-method&quot;&gt;Base-line model 1: Group addtivity method&lt;/h4&gt;
+
+&lt;p&gt;Historically, Benson Group Additivity Method is polularly used because of its simplicity. It breaks down a molecule into sub-structural pieces and sums up their contributions to overall thermodynamic properties, which essentially is a &lt;strong&gt;linear model&lt;/strong&gt; with &lt;code class=&quot;highlighter-rouge&quot;&gt;bag of sub-structures&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;For example, the molecule 2-methylnonane consists of three types of sub-structures includes:&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/gav_demo.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;1 tertiary carbon atom&lt;/li&gt;
+  &lt;li&gt;6 secondary carbon atoms&lt;/li&gt;
+  &lt;li&gt;3 primary carbon atoms&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;This simple idea is effective for linear-shaped molecules, but for the cyclic molecules collected in the above two datasets, Benson Group Additivity approach (already implemented in &lt;a href=&quot;http://rmg.mit.edu/molecule_search&quot;&gt;RMG thermo estimator&lt;/a&gt;) performs badly:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Enthalpy energy prediction &lt;code class=&quot;highlighter-rouge&quot;&gt;test error = 60 kcal/mol&lt;/code&gt; (RMSE).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The error largely comes from its underlying design/assumption:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;the &lt;strong&gt;effect of relative positions&lt;/strong&gt; of sub-structures is negiligle (&lt;strong&gt;independent contributions&lt;/strong&gt; from sub-structures)&lt;/li&gt;
+  &lt;li&gt;sub-structures are very small, usually atom based&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;The assumptions become less valid when it comes to cyclic compounds since they are relatively large molecules with strong interations between sub-structures.&lt;/p&gt;
+
+&lt;h4 id=&quot;base-line-model-2-morgan-fingerprint-with-neural-net&quot;&gt;Base-line model 2: Morgan fingerprint with neural net&lt;/h4&gt;
+
+&lt;p&gt;Morgan fingerprint, also known as ECFP (&lt;a href=&quot;https://docs.chemaxon.com/display/docs/Extended+Connectivity+Fingerprint+ECFP&quot;&gt;Extended-Connectivity Fingerprint&lt;/a&gt;) tries to see bigger chemical environments within a moleucle. It defines fragments with user-specified radius (e.g., 2-atom distance radius). More details can be found in &lt;a href=&quot;http://www.rdkit.org/UGM/2012/Landrum_RDKit_UGM.Fingerprints.Final.pptx.pdf&quot;&gt;RDKit presentation&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;In this base-line model, we use Morgan fingerprint as our molecular feature vector. We also use one-hidden-layer neural networks to account for non-linear interations between fragments.&lt;/p&gt;
+
+&lt;p&gt;The architecture is shown below:&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/morgan_demo.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;This approach of combining Morgan fingerprint and non-linear regression model improves prediction performance:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Enthalpy energy prediction &lt;code class=&quot;highlighter-rouge&quot;&gt;test error = 19 kcal/mol&lt;/code&gt; (RMSE).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;However, 19 kcal/mol is still not satisfying in chemistry discovery; to our experience, enthalpy energy uncertainty of larger than 5 kcal/mol could easily mis-guide discovery direction.&lt;/p&gt;
+
+&lt;h3 id=&quot;molecular-convolutional-neural-network&quot;&gt;2. Molecular convolutional neural network&lt;/h3&gt;
+
+&lt;p&gt;Besides accuracy issue, for fixed molecular fingerprint, people face the practical challenge that feature engineering requires chemical expertise and manual tweaking, naturally slowing down the process of learning from data.&lt;/p&gt;
+
+&lt;p&gt;To solve that, one idea by &lt;a href=&quot;https://arxiv.org/abs/1509.09292&quot;&gt;Aspuru-Guzik&lt;/a&gt; is to make fingerprint also learnable from data. Thus, this project is actually to build an accurate enthalpy estimator that learns featurization and regression altogether from data.&lt;/p&gt;
+
+&lt;p&gt;More specifically, the learnable featurization module uses graph convolutional neural networks (see architecture below). The learned feature vector willthen be fed into a fully connected neural network with one hidden layer, which serves the regression model.&lt;/p&gt;
+
+&lt;h4 id=&quot;architecture&quot;&gt;&lt;strong&gt;Architecture&lt;/strong&gt;&lt;/h4&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/molconv_demo.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Each input molecule to molecular convolutional neural network (thereafter MCNN) is represented by three components: atom fingerprint matrix (denoted by A), bond fingerprint tensor (denoted by B), connectivity matrix (denoted by C).&lt;/p&gt;
+
+&lt;p&gt;For dimensionality, &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;n_a × f_a&lt;/script&gt;, &lt;script type=&quot;math/tex&quot;&gt;B&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;n_a × n_a × f_b&lt;/script&gt;, and &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt; is &lt;script type=&quot;math/tex&quot;&gt;n_a × n_a&lt;/script&gt;, where &lt;script type=&quot;math/tex&quot;&gt;n_a&lt;/script&gt; is the number of atoms, &lt;script type=&quot;math/tex&quot;&gt;f_a&lt;/script&gt; the size of atom fingerprint and &lt;script type=&quot;math/tex&quot;&gt;f_b&lt;/script&gt; the size of bond fingerprint. The output of MCNN is molecular fingerprint vector with size of &lt;script type=&quot;math/tex&quot;&gt;f_m&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Atom fingerprint matrix &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt;&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;For a given molecule, &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt; stores the information at atom level; each atom has a fingerprint vector therefore &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt; has size of &lt;script type=&quot;math/tex&quot;&gt;n_a × f_a&lt;/script&gt;. Atom fingerprint includes basic atomic information such as atomic charge, number of attached hydrogens, etc.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Bond fingerprint matrix &lt;script type=&quot;math/tex&quot;&gt;B&lt;/script&gt;&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;For a given molecule, &lt;script type=&quot;math/tex&quot;&gt;B&lt;/script&gt; stores the information at bond level; each bond has a fingerprint vector therefore &lt;script type=&quot;math/tex&quot;&gt;B&lt;/script&gt; has size of na × na × fb. Bond fingerprint includes basic information such as bond order, whether the bond is in ring, etc.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Connectivity matrix &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt;&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;For a given molecule, each possible pair of atoms has an entry in &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt;; 1 indicates there’s a bond between the pair, vice versa, therefore &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt; has size of &lt;script type=&quot;math/tex&quot;&gt;n_a × n_a&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Molecular convolution&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;We could add each atom fingerprint to its local neighbors by some weights if neccessary, called molecular convolution, using &lt;script type=&quot;math/tex&quot;&gt;A&lt;/script&gt; and &lt;script type=&quot;math/tex&quot;&gt;C&lt;/script&gt;, and get convoluted atom fingerprint matrix &lt;script type=&quot;math/tex&quot;&gt;A^{r=1}&lt;/script&gt;. r = 1 indicates the output fingerprint contains local information with radius of 1 atom distance. Increasing radius by consecutive convolution gives &lt;script type=&quot;math/tex&quot;&gt;A^{r=m}&lt;/script&gt; which captures larger local neighborhood information.&lt;/p&gt;
+
+&lt;h4 id=&quot;performance&quot;&gt;&lt;strong&gt;Performance&lt;/strong&gt;&lt;/h4&gt;
+
+&lt;p&gt;The best model selected from 5-fold cross-validation gives remarkable preformance boost:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;Enthalpy energy prediction &lt;code class=&quot;highlighter-rouge&quot;&gt;test error = 3 kcal/mol&lt;/code&gt; (RMSE).&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h4 id=&quot;interpretation&quot;&gt;&lt;strong&gt;Interpretation&lt;/strong&gt;&lt;/h4&gt;
+
+&lt;p&gt;Let’s see if the learned fingerprint makes sense.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Check 1: &lt;strong&gt;similar molecules with similar fingerprint&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/interpretation_check1.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Three similar cyclic hydrocarbon (first three in the figure) are selected, whose fingerprints share major high peaks. A linear molecule with same number of carbons appears relatively different, as expected. So, pass!&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Check 2: &lt;strong&gt;king-queen =? man-woman&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;In &lt;code class=&quot;highlighter-rouge&quot;&gt;word2vec&lt;/code&gt; project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using &lt;code class=&quot;highlighter-rouge&quot;&gt;word2vec&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;vector(king)-vector(queen)&lt;/code&gt; is very similar to &lt;code class=&quot;highlighter-rouge&quot;&gt;vector(man)-vector(woman)&lt;/code&gt;, as semantics requires.&lt;/p&gt;
+
+&lt;p&gt;Similarly, four molecules are selected:&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/interpretation_check2.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Again, the &lt;code class=&quot;highlighter-rouge&quot;&gt;king molecule&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;queen molecule&lt;/code&gt; differ by a 4-member ring, same as for the difference between &lt;code class=&quot;highlighter-rouge&quot;&gt;man molecule&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;woman molecule&lt;/code&gt;. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;Check 3: &lt;strong&gt;nearest neighbor in fingerprint space&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Although there’s no absolute definition of molecular similarity, human can generally tell if two molecular structures are alike. This check is to see if the machine generates sensible similar molecules in the training set given any molecules.&lt;/p&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/interpretation_check3.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;The given molecule example in the figure consists of a 4-member ring and 6-member ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a 4-member ring and either one 5-member or one 6-member ring. Looking good!&lt;/p&gt;
+
+&lt;p&gt;Another aspect is unsaturated bonds in the given molecule: one double bond next to the fused bridge and one far-away triple bond. The second neighbour from left is exactly matching this aspect and all the remaining neighbours also have two similar unsaturated parts in structure. Pass!&lt;/p&gt;
+
+&lt;p&gt;At this point, we’ve kind of got a new model/estimator that appears to have greatly better accuracy and generate sensible fingerprints (although we still don’t exactly know what each entry in the fingerprint vector stands for).&lt;/p&gt;
+
+&lt;h3 id=&quot;effectiveness-of-learning-new-data&quot;&gt;3. Effectiveness of learning new data&lt;/h3&gt;
+
+&lt;h4 id=&quot;rmg-monocyclic&quot;&gt;rmg-monocyclic&lt;/h4&gt;
+
+&lt;h4 id=&quot;rmg-bicyclic&quot;&gt;rmg-bicyclic&lt;/h4&gt;
+
+&lt;h4 id=&quot;rmg-tricyclic&quot;&gt;rmg-tricyclic&lt;/h4&gt;
+
+&lt;h4 id=&quot;rmg-unsaturated-cyclic&quot;&gt;rmg-unsaturated-cyclic&lt;/h4&gt;
+</description>
+        <pubDate>Mon, 17 Apr 2017 21:01:11 -0400</pubDate>
+        <link>http://yourdomain.com/basic_project/2017/04/17/machine-learning-in-molecular-property-prediction/</link>
+        <guid isPermaLink="true">http://yourdomain.com/basic_project/2017/04/17/machine-learning-in-molecular-property-prediction/</guid>
+        
+        
+        <category>basic_project</category>
+        
+      </item>
     
       <item>
         <title>6.036 Project 2: MNIST Classifiers</title>
