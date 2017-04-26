@@ -131,14 +131,14 @@ Three similar cyclic hydrocarbon (first three in the figure) are selected, whose
 
 *Check 2: __king-queen =? man-woman__*
 
-In `word2vec` project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using `word2vec`, `vector(king)-vector(queen)` is very similar to `vector(man)-vector(woman)`, as semantics requires.
+In **word2vec** project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using **word2vec**, **vector(king)-vector(queen)** is very similar to **vector(man)-vector(woman)**, as semantics requires.
 
 Similarly, four molecules are selected:
 
 {: .srs_img}
 ![Alt text]({{ site.github.url }}/assets/molconv_post/img/interpretation_check2.png)
 
-Again, the `king molecule` and `queen molecule` differ by a 4-member ring, same as for the difference between `man molecule` and `woman molecule`. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!
+Again, the **king molecule** and **queen molecule** differ by a 4-member ring, same as for the difference between **man molecule** and **woman molecule**. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!
 
 *Check 3: __nearest neighbor in fingerprint space__*
 
@@ -147,7 +147,7 @@ Although there's no absolute definition of molecular similarity, human can gener
 {: .srs_img}
 ![Alt text]({{ site.github.url }}/assets/molconv_post/img/interpretation_check3.png)
 
-The given molecule example in the figure consists of a 4-member ring and 6-member ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a 4-member ring and either one 5-member or one 6-member ring. Looking good!
+The given molecule example in the figure consists of a `4-member` ring and `6-member` ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a `4-member` ring and either one `5-member` or one `6-member` ring. Looking good!
 
 Another aspect is unsaturated bonds in the given molecule: one double bond next to the fused bridge and one far-away triple bond. The second neighbour from left is exactly matching this aspect and all the remaining neighbours also have two similar unsaturated parts in structure. Pass!
 
@@ -155,10 +155,21 @@ At this point, we've kind of got a new model/estimator that appears to have grea
 
 ### 3. Effectiveness of learning new data
 
-#### rmg-monocyclic
+Besides accuracy and interpretability, it's also crucial to evaluate how effectively the new machine architecture learns from new data. 
 
-#### rmg-bicyclic
+It is because the range of applications RMG explores keeps extending; along the past 10 years, RMG started from modeling nature gas combustion (usually small simple molecules) to recently being capable of handling full chemistry of hydrocarbon up to 20 carbons (obviously a lot new molecular structures come into our scope). On the other hand, it's extending its capability towards oxygenates, sulfurides and nitrogen compounds as well.
 
-#### rmg-tricyclic
+So, here we prepared two extra small datasets, whose molecules are distinct from those in the above training datasets. 
 
-#### rmg-unsaturated-cyclic
+- Large tricyclic: larger rings that those in previous training datasets but mostly have saturated bonds as previous training examples do
+
+- Unsaturated cyclics: cyclics that have multiple unsaturated bonds in same ring, which is very distinct from preivous training examples.
+
+{: .srs_img}
+![Alt text]({{ site.github.url }}/assets/molconv_post/img/effectiveness.png)
+
+As expected, the unsaturated cyclic dataset starts with higher test error than large tricyclic one, which is because its examples are much more different from previous training examples than the other.
+
+Good news is both datasets have test error go down as feeding more new relavent data points. After 50 new data points, the test error enters 10 kcal/mol region.
+
+

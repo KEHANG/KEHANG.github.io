@@ -5,8 +5,8 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Mon, 24 Apr 2017 19:56:02 -0400</pubDate>
-    <lastBuildDate>Mon, 24 Apr 2017 19:56:02 -0400</lastBuildDate>
+    <pubDate>Wed, 26 Apr 2017 12:58:23 -0400</pubDate>
+    <lastBuildDate>Wed, 26 Apr 2017 12:58:23 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -145,13 +145,13 @@
 
 &lt;p&gt;&lt;em&gt;Check 2: &lt;strong&gt;king-queen =? man-woman&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
 
-&lt;p&gt;In &lt;code class=&quot;highlighter-rouge&quot;&gt;word2vec&lt;/code&gt; project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using &lt;code class=&quot;highlighter-rouge&quot;&gt;word2vec&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;vector(king)-vector(queen)&lt;/code&gt; is very similar to &lt;code class=&quot;highlighter-rouge&quot;&gt;vector(man)-vector(woman)&lt;/code&gt;, as semantics requires.&lt;/p&gt;
+&lt;p&gt;In &lt;strong&gt;word2vec&lt;/strong&gt; project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using &lt;strong&gt;word2vec&lt;/strong&gt;, &lt;strong&gt;vector(king)-vector(queen)&lt;/strong&gt; is very similar to &lt;strong&gt;vector(man)-vector(woman)&lt;/strong&gt;, as semantics requires.&lt;/p&gt;
 
 &lt;p&gt;Similarly, four molecules are selected:&lt;/p&gt;
 
 &lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/interpretation_check2.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;Again, the &lt;code class=&quot;highlighter-rouge&quot;&gt;king molecule&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;queen molecule&lt;/code&gt; differ by a 4-member ring, same as for the difference between &lt;code class=&quot;highlighter-rouge&quot;&gt;man molecule&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;woman molecule&lt;/code&gt;. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!&lt;/p&gt;
+&lt;p&gt;Again, the &lt;strong&gt;king molecule&lt;/strong&gt; and &lt;strong&gt;queen molecule&lt;/strong&gt; differ by a 4-member ring, same as for the difference between &lt;strong&gt;man molecule&lt;/strong&gt; and &lt;strong&gt;woman molecule&lt;/strong&gt;. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!&lt;/p&gt;
 
 &lt;p&gt;&lt;em&gt;Check 3: &lt;strong&gt;nearest neighbor in fingerprint space&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
 
@@ -159,7 +159,7 @@
 
 &lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/interpretation_check3.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
 
-&lt;p&gt;The given molecule example in the figure consists of a 4-member ring and 6-member ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a 4-member ring and either one 5-member or one 6-member ring. Looking good!&lt;/p&gt;
+&lt;p&gt;The given molecule example in the figure consists of a &lt;code class=&quot;highlighter-rouge&quot;&gt;4-member&lt;/code&gt; ring and &lt;code class=&quot;highlighter-rouge&quot;&gt;6-member&lt;/code&gt; ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a &lt;code class=&quot;highlighter-rouge&quot;&gt;4-member&lt;/code&gt; ring and either one &lt;code class=&quot;highlighter-rouge&quot;&gt;5-member&lt;/code&gt; or one &lt;code class=&quot;highlighter-rouge&quot;&gt;6-member&lt;/code&gt; ring. Looking good!&lt;/p&gt;
 
 &lt;p&gt;Another aspect is unsaturated bonds in the given molecule: one double bond next to the fused bridge and one far-away triple bond. The second neighbour from left is exactly matching this aspect and all the remaining neighbours also have two similar unsaturated parts in structure. Pass!&lt;/p&gt;
 
@@ -167,13 +167,27 @@
 
 &lt;h3 id=&quot;effectiveness-of-learning-new-data&quot;&gt;3. Effectiveness of learning new data&lt;/h3&gt;
 
-&lt;h4 id=&quot;rmg-monocyclic&quot;&gt;rmg-monocyclic&lt;/h4&gt;
+&lt;p&gt;Besides accuracy and interpretability, it’s also crucial to evaluate how effectively the new machine architecture learns from new data.&lt;/p&gt;
 
-&lt;h4 id=&quot;rmg-bicyclic&quot;&gt;rmg-bicyclic&lt;/h4&gt;
+&lt;p&gt;It is because the range of applications RMG explores keeps extending; along the past 10 years, RMG started from modeling nature gas combustion (usually small simple molecules) to recently being capable of handling full chemistry of hydrocarbon up to 20 carbons (obviously a lot new molecular structures come into our scope). On the other hand, it’s extending its capability towards oxygenates, sulfurides and nitrogen compounds as well.&lt;/p&gt;
 
-&lt;h4 id=&quot;rmg-tricyclic&quot;&gt;rmg-tricyclic&lt;/h4&gt;
+&lt;p&gt;So, here we prepared two extra small datasets, whose molecules are distinct from those in the above training datasets.&lt;/p&gt;
 
-&lt;h4 id=&quot;rmg-unsaturated-cyclic&quot;&gt;rmg-unsaturated-cyclic&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Large tricyclic: larger rings that those in previous training datasets but mostly have saturated bonds as previous training examples do&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Unsaturated cyclics: cyclics that have multiple unsaturated bonds in same ring, which is very distinct from preivous training examples.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p class=&quot;srs_img&quot;&gt;&lt;img src=&quot;/assets/molconv_post/img/effectiveness.png&quot; alt=&quot;Alt text&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;As expected, the unsaturated cyclic dataset starts with higher test error than large tricyclic one, which is because its examples are much more different from previous training examples than the other.&lt;/p&gt;
+
+&lt;p&gt;Good news is both datasets have test error go down as feeding more new relavent data points. After 50 new data points, the test error enters 10 kcal/mol region.&lt;/p&gt;
+
 </description>
         <pubDate>Mon, 17 Apr 2017 21:01:11 -0400</pubDate>
         <link>http://yourdomain.com/basic_project/2017/04/17/machine-learning-in-molecular-property-prediction/</link>

@@ -199,13 +199,13 @@
 
 <p><em>Check 2: <strong>king-queen =? man-woman</strong></em></p>
 
-<p>In <code class="highlighter-rouge">word2vec</code> project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using <code class="highlighter-rouge">word2vec</code>, <code class="highlighter-rouge">vector(king)-vector(queen)</code> is very similar to <code class="highlighter-rouge">vector(man)-vector(woman)</code>, as semantics requires.</p>
+<p>In <strong>word2vec</strong> project, researchers tends to use subtraction to interpret embedding vector (word equivalent of fingerprint). One of the most famous examples is using <strong>word2vec</strong>, <strong>vector(king)-vector(queen)</strong> is very similar to <strong>vector(man)-vector(woman)</strong>, as semantics requires.</p>
 
 <p>Similarly, four molecules are selected:</p>
 
 <p class="srs_img"><img src="/assets/molconv_post/img/interpretation_check2.png" alt="Alt text" /></p>
 
-<p>Again, the <code class="highlighter-rouge">king molecule</code> and <code class="highlighter-rouge">queen molecule</code> differ by a 4-member ring, same as for the difference between <code class="highlighter-rouge">man molecule</code> and <code class="highlighter-rouge">woman molecule</code>. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!</p>
+<p>Again, the <strong>king molecule</strong> and <strong>queen molecule</strong> differ by a 4-member ring, same as for the difference between <strong>man molecule</strong> and <strong>woman molecule</strong>. The two fingerpring differences are quite similar, sharing most major high peaks. Another pass!</p>
 
 <p><em>Check 3: <strong>nearest neighbor in fingerprint space</strong></em></p>
 
@@ -213,7 +213,7 @@
 
 <p class="srs_img"><img src="/assets/molconv_post/img/interpretation_check3.png" alt="Alt text" /></p>
 
-<p>The given molecule example in the figure consists of a 4-member ring and 6-member ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a 4-member ring and either one 5-member or one 6-member ring. Looking good!</p>
+<p>The given molecule example in the figure consists of a <code class="highlighter-rouge">4-member</code> ring and <code class="highlighter-rouge">6-member</code> ring; since 6-member and 5-member are quite similar (both have similar ring strain contributions), we see most returned neighbours have a <code class="highlighter-rouge">4-member</code> ring and either one <code class="highlighter-rouge">5-member</code> or one <code class="highlighter-rouge">6-member</code> ring. Looking good!</p>
 
 <p>Another aspect is unsaturated bonds in the given molecule: one double bond next to the fused bridge and one far-away triple bond. The second neighbour from left is exactly matching this aspect and all the remaining neighbours also have two similar unsaturated parts in structure. Pass!</p>
 
@@ -221,13 +221,27 @@
 
 <h3 id="effectiveness-of-learning-new-data">3. Effectiveness of learning new data</h3>
 
-<h4 id="rmg-monocyclic">rmg-monocyclic</h4>
+<p>Besides accuracy and interpretability, it’s also crucial to evaluate how effectively the new machine architecture learns from new data.</p>
 
-<h4 id="rmg-bicyclic">rmg-bicyclic</h4>
+<p>It is because the range of applications RMG explores keeps extending; along the past 10 years, RMG started from modeling nature gas combustion (usually small simple molecules) to recently being capable of handling full chemistry of hydrocarbon up to 20 carbons (obviously a lot new molecular structures come into our scope). On the other hand, it’s extending its capability towards oxygenates, sulfurides and nitrogen compounds as well.</p>
 
-<h4 id="rmg-tricyclic">rmg-tricyclic</h4>
+<p>So, here we prepared two extra small datasets, whose molecules are distinct from those in the above training datasets.</p>
 
-<h4 id="rmg-unsaturated-cyclic">rmg-unsaturated-cyclic</h4>
+<ul>
+  <li>
+    <p>Large tricyclic: larger rings that those in previous training datasets but mostly have saturated bonds as previous training examples do</p>
+  </li>
+  <li>
+    <p>Unsaturated cyclics: cyclics that have multiple unsaturated bonds in same ring, which is very distinct from preivous training examples.</p>
+  </li>
+</ul>
+
+<p class="srs_img"><img src="/assets/molconv_post/img/effectiveness.png" alt="Alt text" /></p>
+
+<p>As expected, the unsaturated cyclic dataset starts with higher test error than large tricyclic one, which is because its examples are much more different from previous training examples than the other.</p>
+
+<p>Good news is both datasets have test error go down as feeding more new relavent data points. After 50 new data points, the test error enters 10 kcal/mol region.</p>
+
 
   </div>
 
