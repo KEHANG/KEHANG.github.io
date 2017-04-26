@@ -172,4 +172,8 @@ As expected, the unsaturated cyclic dataset starts with higher test error than l
 
 Good news is both datasets have test error go down as feeding more new relavent data points. After 50 new data points, the test error enters 10 kcal/mol region.
 
+### 4. Future work
+
+The new proposed estimator appears much effective in predicting molecular themodynamic properties by mapping graph structures through fingerprints to eventually properties. To expand its predicting power to new categories of molecules, we'd make sure it can learn  as long as new data is available. But data is a must to make this estimator evolve. To accomplish that, I'll talk about data insfrastructure construction in next posts to build a data-machine pipeline.
+
 

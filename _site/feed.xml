@@ -5,8 +5,8 @@
     <description>Kehang Han Blog. AI, Kinetics, and Energy.</description>
     <link>http://yourdomain.com/</link>
     <atom:link href="http://yourdomain.com/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 26 Apr 2017 12:58:23 -0400</pubDate>
-    <lastBuildDate>Wed, 26 Apr 2017 12:58:23 -0400</lastBuildDate>
+    <pubDate>Wed, 26 Apr 2017 13:07:36 -0400</pubDate>
+    <lastBuildDate>Wed, 26 Apr 2017 13:07:36 -0400</lastBuildDate>
     <generator>Jekyll v3.0.1</generator>
     
       <item>
@@ -187,6 +187,10 @@
 &lt;p&gt;As expected, the unsaturated cyclic dataset starts with higher test error than large tricyclic one, which is because its examples are much more different from previous training examples than the other.&lt;/p&gt;
 
 &lt;p&gt;Good news is both datasets have test error go down as feeding more new relavent data points. After 50 new data points, the test error enters 10 kcal/mol region.&lt;/p&gt;
+
+&lt;h3 id=&quot;future-work&quot;&gt;4. Future work&lt;/h3&gt;
+
+&lt;p&gt;The new proposed estimator appears much effective in predicting molecular themodynamic properties by mapping graph structures through fingerprints to eventually properties. To expand its predicting power to new categories of molecules, we’d make sure it can learn  as long as new data is available. But data is a must to make this estimator evolve. To accomplish that, I’ll talk about data insfrastructure construction in next posts to build a data-machine pipeline.&lt;/p&gt;
 
 </description>
         <pubDate>Mon, 17 Apr 2017 21:01:11 -0400</pubDate>
