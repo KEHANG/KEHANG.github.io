@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Named Entity Recognition Explained - Part I"
+title:  "Demystify Named Entity Recognition - Part I"
 date:   2019-05-14 17:16:16
 categories: explained
 ---
@@ -36,7 +36,7 @@ This is useful in lots of cases. For instance, *Apple Mail* identifies `TIME` en
 
 So how does it actually work?
 
-## 2. Mathematic Formulation
+## 2. Mathematical Formulation
 
 Let's step back and see what **NER** is doing essentially. For a given sentence $$ x_1 ... x_n $$, **NER** decides to tag each word $$ x_i $$ with an entity label $$ y_i $$.
 
