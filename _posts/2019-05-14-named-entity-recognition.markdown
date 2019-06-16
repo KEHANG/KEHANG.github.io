@@ -1,6 +1,6 @@
 ---
 layout: post
-title:  "Demystify Named Entity Recognition - Part I"
+title:  "Demystifying Named Entity Recognition - Part I"
 date:   2019-05-14 17:16:16
 categories: explained
 ---
