@@ -209,5 +209,5 @@ $$ \max_{y_2} p(y_3=u |y_2, x_1...x_n) \cdot s_{partial, 2}(y_1^{*}, y_2, x_1...
 
 Similarly, it takes another 25 evalutions. Basically we can keep rolling to all the way $$k=n$$ with each step forward we carry out another 25 evaluations. So the total compuation complexity is around $$25N$$, namely $$O(N)$$.
 
-This post turns out to be longer than I thought, I was only able to answer the first questions raised in the beginning. I'll add following posts to cover the remaining three questions. See you soon.
+This post turns out to be longer than I thought, I was only able to answer the first questions raised in the beginning. And this seemingly natural approach is actually the so-called *maximum entropy Markov model* (MEMM) approach. There's many more other ways to solve NER problem, which I'll talk about in next posts together with the answers to the remaining three questions. See you soon.
 
