@@ -33,17 +33,34 @@ $$p(y_1...y_n | x_1...x_n) = \prod_{i=1}^{n} p(y_i |y_{i-1}, x_1...x_n)$$
 We then model $$p(y_i | y_{i-1}, x_1...x_n)$$ 
 using local environment:
 
-$$p(y_i | y_{i-1}, x_1...x_n) = \frac{\exp({\vec{\theta} \cdot \vec{f}(y_{i-1}, y_i, x_1...x_n)})}{\sum_{y'}{\exp({\vec{\theta} \cdot \vec{f}(y_{i-1}, y', x_1...x_n)})}}$$
-
-**In training**, we use *maximum likelihood estimation* to get optimal $$\vec{\theta}$$ that 
-
-$$max_{\theta} \prod_{j=1}^{N} p(y^j|x^j)$$
-
-where $$x^j, y^j$$ are the $$j^{th}$$ sentence and corresponding tag sequence (the whole training dataset has $$N$$ examples).
+$$p(y_i | y_{i-1}, x_1...x_n) = \frac{\exp({\underline{\theta} \cdot \underline{f}(y_{i-1}, y_i, x_1...x_n)})}{\sum_{y'}{\exp({\underline{\theta} \cdot \underline{f}(y_{i-1}, y', x_1...x_n)})}}$$
 
 **In inference**, we use *Viterbi* algorithm to get best-fitting tag sequence for a given sentence. Details can be found in 2.2.1 section of the [previous post]({% post_url 2019-05-14-named-entity-recognition %}).
 
+**In training**, we use *maximum likelihood estimation* to get optimal $$\underline{\theta}$$ that 
+
+$$max_{\underline{\theta}} \prod_{j=1}^{N} p(\underline{x}^j | \underline{y}^j)$$
+
+where $$\underline{x}^j, \underline{y}^j$$ are the $$j^{th}$$ sentence and corresponding tag sequence (the whole training dataset has $$N$$ examples).
+
 ### 1.2 CRF
+
+Instead of $$p(y_i | y_{i-1}, \underline{x})$$
+, 
+Conditional Random Field (CRF) approach chooses to directly model $$p(\underline{y} | \underline{x})$$:
+
+$$p(\underline{y} | \underline{x}) = \frac{\exp({\vec{\Theta} \cdot \vec{F}(\underline{x}, \underline{y})})}{\sum_{\underline{y}'}{\exp({\vec{\Theta} \cdot \vec{F}(\underline{x}, \underline{y}')})}}$$
+
+The main challenge in direct modeling is that the denominator is sum of $$K^n$$ terms where $$K$$ is the number of tag label types and $$n$$ is the length of sentence to tag. This is a much larger number than that in MEMM - $$p(y_i | y_{i-1}, x_1...x_n)$$ 
+has just $$K$$ terms in the denominator.
+
+**In inference**, we are only interested in the $$\underline{y}^{*}$$ that gives the highest probability rather than the highest probability itself:
+
+$$
+\underline{y}^{*} = \text{arg} \max_{\underline{y}} p(\underline{y} | \underline{x}) = \text{arg} \max_{\underline{y}}\exp({\vec{\Theta} \cdot \vec{F}(\underline{x}, \underline{y})})
+$$
+
+If using brutal force, we have to evaluate $$\exp({\vec{\Theta} \cdot \vec{F}(\underline{x}, \underline{y})})$$ for $$K^n$$ times. Fortunately, there's a better way which I'm going to talk about next.
 
 ## 2. State-of-the-art models
 
@@ -51,7 +68,7 @@ The state-of-the-art models we'll discuss here are [LSTM](https://en.wikipedia.o
 
 ### 2.1 LSTM
 
-### 2.2 BiLSTM-
+### 2.2 BiLSTM-CRF
 
 ### 2.3 Bert
 
