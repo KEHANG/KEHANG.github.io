@@ -11,7 +11,7 @@ As a continuation for [Demystifying Named Entity Recognition - Part I]({% post_u
 
 - **deep learning** models
 
-- **off-the-shelf** options
+- python libraries
 
 Over the history of [NER](https://en.wikipedia.org/wiki/Named-entity_recognition), there's been three major approaches: grammar-based, dictionary-based and machine-learning-based. 
 Grammar-based approach produces a set of empirical rules hand-crafted by experienced computational linguists, usually takes months of work.
@@ -103,8 +103,131 @@ The deep learning models we'll discuss here are [LSTM](https://en.wikipedia.org/
 
 ### 2.1 LSTM
 
-### 2.2 BiLSTM-CRF
+#### 2.1.1 Architecture
 
-### 2.3 Bert
+{: .srs_img}
+![Alt text]({{ site.github.url }}/assets/ner_post/img/lstm.png){:width="100%"}
 
-## 3. Off-the-shelf options
+In the setting of LSTM, each token $$x_i$$ is fed to a LSTM unit, which outputs a $$o_i$$. $$o_i$$ models log probabilities of all possible tags at i-th position, so it has dimension of $$K$$.
+
+$$o_i = \begin{bmatrix}log P(y_i = PER | \underline{x})\\log P(y_i = ORG | \underline{x})\\...\\log P(y_i = MISC | \underline{x})\end{bmatrix}$$
+
+#### 2.1.2 Inference
+
+The inference in LSTM is very simple: $$y_i$$ = the tag with highest log probability at i-th position.
+
+$$y_i^* = argmax_k o_{i,k}$$
+
+which indicates the prediction of i-th position only utilizes the sentence information up to i-th token - only the left side of the sentence is used for tag prediction at i-th position. BiLSTM is designed to provide context information from both sides, which will be seen in next section.
+
+#### 2.1.3 Training
+
+Like all the other neural network training, LSTM training uses **Stochastic Gradient Descent** algorithm. Loss function adopts **negative log likelihood**. For a data point $$(\underline{x^j}, \underline{y^j})$$, we have its loss calculated as:
+
+$$L_j = -\sum_{i=1}^{n_j} o_i^j[y_{i}^j]$$
+
+where $$n_j$$ is the length of the sentence $$x^j$$, $$o_i^j$$ is the LSTM output at i-th position and $$y_i^j$$ is the ground truth tag at i-th position. 
+
+**Total loss** is the mean of all the individual losses.
+
+$$L = \frac{1}{N}\sum_{j=1}^N L_j$$
+
+where $$N$$ is the total number of training examples.
+
+### 2.2 BiLSTM
+
+{: .srs_img}
+![Alt text]({{ site.github.url }}/assets/ner_post/img/bilstm.png){:width="120%"}
+
+BiLSTM stands for bi-directional LSTM, which provides sequence information from both directions. Because of that, BiLSTM is more powerful than LSTM. Except the bi-directional component, the meaning of network output, inference, and training loss are same as LSTM.
+
+### 2.3 BiLSTM-CRF
+
+BiLSTM captures contextual information around i-th position. But at each position, BiLSTM predicts tags basically in an independent fashion. There's cases where some adjacent positions are predicted with tags which do not usually appear together in reality. For example, I-PER tag should not follow B-ORG. To account for this kind of interactions between adjacent tags, Conditional Random Field (CRF) is introduced to BiLSTM.
+
+#### 2.3.1 Architecture
+
+{: .srs_img}
+![Alt text]({{ site.github.url }}/assets/ner_post/img/bilstm-crf.png){:width="120%"}
+
+where $$o_i$$ models **emission scores** of all possible tags at i-th position and $$y_i^*$$ is the best tag for i-th position which collectively achieves highest sequence score.
+
+$$o_i = \begin{bmatrix} score_{emission}(y_i = PER | \underline{x})\\score_{emission}(y_i = ORG | \underline{x})\\...\\score_{emission}(y_i = MISC | \underline{x})\end{bmatrix}$$
+
+CRF layer also learns a transition matrix $$A$$ which stores transition scores between any possible pair of tag types.
+
+#### 2.3.1 Inference
+
+Same as the inference in CRF section, given a trained network and sentence $$\underline{x}$$, any sequence $$\underline{s}$$ will have a score.
+
+$$score(\underline{x}, \underline{s}) = \sum_{i=1}^n o_i[s_i] + A[s_{i-1}][s_i]= \sum_{i=1}^n \phi(\underline{x}, s_{i-1}, s_i)$$
+
+The score is a sum of contributions from token level. i-th position has contribution of $$\phi(\underline{x}, s_{i-1}, s_i) = o_i[s_i] + A[s_{i-1}][s_i]$$, where the first term is emission score and second term is transition score.
+
+To find the tag sequence $$\underline{y}^*$$ achieving highest score, we need to use dynamic programming.
+
+Define sub problem $$DP(k,t)$$ to be the max score accumulated from 1st position to $$k$$-th position with the $$k$$-th position tag being $$t$$, detailed as follows:
+
+$$DP(k, t) = \max \limits_{\underline{s}\in S^k:s_k=t} \sum_{i=1}^k \phi(\underline{x}, s_{i-1}, s_i)$$
+
+The recursion would be:
+
+$$DP(k+1, t) = \max \limits_{t'} [DP(k, t') + \phi(\underline{x}, t', t)]$$
+
+The original problem is then
+
+$$score(\underline{x}, \underline{y}^*) = \max \limits_{t} DP(n, t)$$
+
+
+We can always use [parent pointers](https://ocw.mit.edu/courses/electrical-engineering-and-computer-science/6-006-introduction-to-algorithms-fall-2011/lecture-videos/MIT6_006F11_lec20.pdf) to retrieve the corresponding best sequence $$\underline{y}^*$$.
+
+#### 2.3.2 Training
+
+Loss function for BiLSTM-CRF also adopts **negative log likelihood**. For a data point $$(\underline{x^j}, \underline{y^j})$$, we have its loss calculated as:
+
+$$L_j = -log P(\underline{y}^j | \underline{x}^j) = - log \frac{exp(score(\underline{x}^j, \underline{y}^j))}{\sum \limits_{\underline{y'}^j} exp(score(\underline{x}^j, \underline{y'}^j))}$$
+
+$$ = - score(\underline{x}^j, \underline{y}^j) + log \sum \limits_{\underline{y'}^j} exp(score(\underline{x}^j, \underline{y'}^j))$$
+
+where the first term is easy to calculate via a forward pass of the network and the second term needs more care. Let's define that term (without log) as $$Z$$, which is exponential sum of scores of all the possible sequences $$\underline{s}$$ of length $$n$$.
+
+$$Z = \sum \limits_{\underline{s} \in S^n} exp(score(\underline{x}, \underline{s})) = \sum \limits_{\underline{s} \in S^n} exp(\sum_{i=1}^{n} \phi(\underline{x}, s_{i-1}, s_i))$$
+
+$$= \sum \limits_{\underline{s} \in S^n} \prod_{i=1}^{n} exp(\phi(\underline{x}, s_{i-1}, s_i)) = \sum \limits_{\underline{s} \in S^n} \prod_{i=1}^{n} \psi(\underline{x}, s_{i-1}, s_i) $$
+
+To calculate $$Z$$, we need to use dynamic programming again. This time the sub-problem $$DP(k,t)$$ is the exponential sum of scores of all possible sequences of length $$k$$ with last tag $$s_k = t$$:
+
+$$ DP(k,t)= \sum \limits_{\underline{s} \in S^k: s_k=t} \prod_{i=1}^{k} \psi(\underline{x}, s_{i-1}, s_i) $$
+
+The recursion would be:
+
+$$ DP(k+1,t) = \sum \limits_{t'} DP(k,t')\cdot \psi(\underline{x}, t', t)$$ 
+
+The original problem is then
+
+$$Z = \sum \limits_{t} DP(n,t)$$
+
+Via this way, individual loss $$L_j$$ is calculated and then batch loss by averaging the individual losses in the batch.
+
+### 2.4 Bert
+
+Recent research on BERT provides an option for NER modeling. Despite of the complexity of the BERT model architecture, in the context of NER it can be regarded as an advanced version of our BiLSTM model - replacing the LSTM with multiple [Transformer Encoder](http://jalammar.github.io/illustrated-transformer/) layers.
+
+{: .srs_img}
+![Alt text]({{ site.github.url }}/assets/ner_post/img/bert.png){:width="120%"}
+
+Thus, $$o_i$$ still models log probabilities of all possible tags at i-th position.
+
+$$o_i = \begin{bmatrix}log P(y_i = PER | \underline{x})\\log P(y_i = ORG | \underline{x})\\...\\log P(y_i = MISC | \underline{x})\end{bmatrix}$$
+
+Inference, and training loss are same as LSTM section.
+
+## 3. Python libraries
+
+There's several machine learning based NER repositories in GitHub. I picked some of them here with some comments.
+
+- [KEHANG/ner](https://github.com/KEHANG/ner/): for English texts, based on PyTorch, has LSTM, BiLSTM, BiLSTM+CRF and Bert models, has released conda package
+
+- [shiyybua/NER](https://github.com/shiyybua/NER): for Chinese texts, based on Tensorflow, only BiLSTM+CRF model, no packages released
+
+- [Franck-Dernoncourt/NeuroNER](https://github.com/Franck-Dernoncourt/NeuroNER): for English texts, based on Tensorflow, has LSTM model, no package released
