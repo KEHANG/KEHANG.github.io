@@ -7,11 +7,7 @@
 
 # Site settings
 title: Kehang Han blog
-email: hkh12@mit.edu
-description: "Kehang Han Blog. AI, Kinetics, and Energy."
-baseurl: "" # the subpath of your site, e.g. /blog
-url: "http://yourdomain.com" # the base hostname & protocol for your site
-github_username:  KEHANG
+description: "&copy; Copyright 2022 by Kehang Han."
 
 # Build settings
 markdown: kramdown

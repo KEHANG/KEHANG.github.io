@@ -2,34 +2,22 @@
 
   <div class="wrapper">
 
-    <h2 class="footer-heading">{{ site.title }}</h2>
-
     <div class="footer-col-wrapper">
+
       <div class="footer-col footer-col-1">
-        <ul class="contact-list">
-          <li>{{ site.title }}</li>
-          <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>
+        <ul class="social-media-list">
+          <a href="https://github.com/KEHANG"><i class="fa fa-fw fa-github fa-lg" aria-hidden="true"></i></a>
+          &nbsp;
+          <a href="https://twitter.com/KehangHan"><i class="fa fa-fw fa-twitter fa-lg" aria-hidden="true"></i></a>
+          &nbsp;
+          <a href="https://www.linkedin.com/in/kehang-han-94999b57/"><i class="fa fa-fw fa-linkedin fa-lg" aria-hidden="true"></i></a>
+          &nbsp;
+          <a href="mailto:kehanghan@gmail.com"><i class="fa fa-fw fa-envelope-o" aria-hidden="true"></i></a>
         </ul>
       </div>
 
       <div class="footer-col footer-col-2">
-        <ul class="social-media-list">
-          {% if site.github_username %}
-          <li>
-            {% include icon-github.html username=site.github_username %}
-          </li>
-          {% endif %}
-
-          {% if site.twitter_username %}
-          <li>
-            {% include icon-twitter.html username=site.twitter_username %}
-          </li>
-          {% endif %}
-        </ul>
-      </div>
-
-      <div class="footer-col footer-col-3">
-        <p>{{ site.description }}</p>
+        <p align="right">{{ site.description }}</p>
       </div>
     </div>
 
