@@ -9,7 +9,7 @@ Ever since I read Armin Ronarcher’s [post](https://lucumr.pocoo.org/2020/5/24/
 
 I tend to forget to stand up and rest during work, so the first version presented here is to give a schedule to my desk. Here is how it looks: [video demo](https://youtu.be/lJAUM3Wqgdk) ([code](https://github.com/KEHANG/smart-desk)).
 
-<iframe width="100%" height="215" src="https://www.youtube.com/embed/lJAUM3Wqgdk" frameborder="0" allowfullscreen></iframe>
+<iframe width="100%" height="360" src="https://www.youtube.com/embed/lJAUM3Wqgdk" frameborder="0" allowfullscreen></iframe>
 
 ## High level connection
 
