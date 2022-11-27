@@ -2,3 +2,5 @@
 _site/*
 
 .sass-cache/*
+
+assets/*/raw_img/*
