@@ -1,13 +1,13 @@
 ---
 layout: post
-title:  "6.036 Project 2: MNIST Classifiers"
-date:   2017-04-01 20:01:11 -0500
+title: "6.036 Project 2: MNIST Classifiers"
+date: 2017-04-01 20:01:11 -0500
 categories: basic_project
 ---
 
 This project is about digit classification using the [MNIST database](http://yann.lecun.com/exdb/mnist/). It contains 60,000 training digits and 10,000 testing digits. The goal is to practically explore differenet classifiers and evaluate their performances. The exploration ranges from simplest classifier, e.g.,linear regression with softmax for classification, to deep nerual networks.
 
-This report will be available online after due date at: `http://kehang.github.io/` 
+This report will be available online after due date at: `http://kehang.github.io/`
 
 for people (including graders) to review. After grading, the post will be modified to be a standalone report with more background.
 
@@ -33,7 +33,7 @@ when `temperature parameter = 1`, the test error is 0.1005, implying the linear 
 
 Increasing temperature parameter would decrease the probability of a sample $$x^{(i)}$$ being assigned a label that has a large $$\theta$$, and increase for labels with small $$\theta$$. The mathematic explanation is following:
 
-$$  P_j = \frac{exp(\theta_j x / \tau)}{\sum_k exp(\theta_k x / \tau)} $$
+$$ P_j = \frac{exp(\theta_j x / \tau)}{\sum_k exp(\theta_k x / \tau)} $$
 
 $$ \frac{\partial log(P_j)}{\partial \tau} = \frac{1}{\tau^2} \Big[ \frac{\sum_k exp(\theta_k x / \tau) \theta_k x}{\sum_k exp(\theta_k x / \tau)} - \theta_j x \Big]$$
 
@@ -106,7 +106,7 @@ $$\phi(x)^T \phi(x') = x_1^3{x_1'}^3 + x_2^3{x_2'}^3 + 3 x_1^2{x_1'}^2 x_2 {x_2'
 
 $$ + 3 x_1^2{x_1'}^2 + 3 x_2^2{x_2'}^2 + 6 x_1{x_1'} x_2 {x_2'} + 3 x_1 {x_1'} + 3 x_2{x_2'} + 1$$
 
-So the corresponding feature vector is 
+So the corresponding feature vector is
 
 $$\phi(x) = (x_1^3, x_2^3, \sqrt{3} x_1^2 x_2, \sqrt{3} x_1 x_2^2, \sqrt{3} x_1^2, \sqrt{3} x_2^2, \sqrt{6} x_1 x_2, \sqrt{3} x_1, \sqrt{3} x_1, 1)^T$$
 
@@ -140,7 +140,7 @@ One way to do is use portion of training data (maybe 10%) as inner validation da
 
 **(a)** after 10 epochs, the `test accuracy = 0.9172`.
 
-**(b)** My final model architecture (``mnist_nnet_fc_improved.py``) has **6 hidden layers** (each has 512 neurons, activation is `ReLU`) and 1 output layer (with 10 neurons, activation is `softmax`). Optimizer is `SGD(lr=0.03, momentum=0.65, decay=0.0001)`. With this architecture, the `test accuracy = 0.9842`.
+**(b)** My final model architecture (`mnist_nnet_fc_improved.py`) has **6 hidden layers** (each has 512 neurons, activation is `ReLU`) and 1 output layer (with 10 neurons, activation is `softmax`). Optimizer is `SGD(lr=0.03, momentum=0.65, decay=0.0001)`. With this architecture, the `test accuracy = 0.9842`.
 
 Among all the tweaks I've tried, increasing the **number of hidden layers** (from 1 hidden layer to 6), the **number of neurons** (from 128 to 512), the **learning rate** (from 0.001 to 0.03, I also modified momentum and decay) help a lot, boosting the test accuracy from `0.9172 to 0.9842`.
 
@@ -187,7 +187,7 @@ model.add(Conv2D(filters=64,kernel_size=(3,3)))
 model.add(Activation("relu"))
 model.add(MaxPooling2D(pool_size=(2, 2)))
 
-model.add(Flatten()) 
+model.add(Flatten())
 model.add(Dense(units=128))
 model.add(Dropout(rate=0.5))
 model.add(Dense(units=10))
@@ -220,7 +220,7 @@ Epoch 14/15
 54000/54000 [================] - 6s - loss: 0.0157 - acc: 0.9945 - val_loss: 0.0345 - val_acc: 0.9912
 Epoch 15/15
 54000/54000 [================] - 6s - loss: 0.0151 - acc: 0.9948 - val_loss: 0.0348 - val_acc: 0.9905
- 8832/10000 [===========>....] - ETA: 0sLoss on test set:0.0324026019065 Accuracy on test set: 0.9902
+8832/10000 [===========>....] - ETA: 0sLoss on test set:0.0324026019065 Accuracy on test set: 0.9902
 
 {% endhighlight %}
 
@@ -293,6 +293,3 @@ It seems that convolutional neural networks are more effective in learning image
 For fully connected neural networks, adding more hidden layers seems helpful at least from 1 hidden layer to 6 hidden layers.
 
 Sometime optimizer can make a difference as well, e.g., here using `adam` optimizer is more effective than `SGD` to reach minimum.
-
-
-

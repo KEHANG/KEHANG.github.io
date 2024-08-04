@@ -1,7 +1,7 @@
 ---
 layout: post
-title:  "A Desk That Listens"
-date:   2022-12-26 10:16:16
+title: "A Desk That Listens"
+date: 2022-12-26 10:16:16
 categories: iot
 ---
 
@@ -16,7 +16,6 @@ One might think it's not really necessary to voice control a desk to go up and d
 Here is how it looks: [video demo](https://youtu.be/2v-3ZvoLdjo) ([code](https://github.com/KEHANG/smart-desk)).
 
 <iframe width="100%" height="360" src="https://www.youtube.com/embed/2v-3ZvoLdjo" frameborder="0" allowfullscreen></iframe>
-
 
 ## Voice-control workflow
 
@@ -53,7 +52,6 @@ In this prototype, my detector is made extremely simple using library [Uberi/spe
 
 [Uberi/speech_recognition](https://github.com/Uberi/speech_recognition) provides multiple APIs including `CMU Sphinx`, `Google Speech Recognition`, `Microsoft Azure Speech` etc. I used `Google Speech Recognition` in this post and found that very easy to hook up with. The library even provides a generic API key so if you don't use it too heavily you can call the API out of the box. If one feels like not to rely on those APIs from big tech, it's not a bad idea to build a speech recognizer from scratch via machine learning. Here is an example [speech recognition by Michael Phi](https://www.youtube.com/watch?v=YereI6Gn3bM).
 
-
 ## Intent detection
 
 Intent detection is also a good place to utilize machine learning. Here again not to complicate things, I built a keyword-based solution to classify intents.
@@ -72,7 +70,6 @@ if any(word in text for word in stand_up_keywords):
 ...
 ...
 ```
-
 
 ## Acknowledgements
 
