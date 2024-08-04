@@ -2,24 +2,23 @@
 layout: about
 title: about
 permalink: /
-subtitle: <a href='#'>Affiliations</a>. Address. Contacts. Moto. Etc.
+subtitle: Probabilistic ML Research at <a href='https://deepmind.google/'>Google DeepMind</a>; Previously MIT / <a href='https://en.wikipedia.org/wiki/Google_Brain'>Google-Brain</a>
 
 profile:
   align: right
-  image: prof_pic.jpg
+  image: me2.jpeg
   image_circular: false # crops the image to make it circular
   more_info: >
-    <p>555 your office number</p>
-    <p>123 your address street</p>
-    <p>Your City, State 12345</p>
 
-news: true # includes a list of news items
-selected_papers: true # includes a list of papers marked as "selected={true}"
+news: false # includes a list of news items
+selected_papers: false # includes a list of papers marked as "selected={true}"
 social: true # includes social icons at the bottom of the page
 ---
 
-Write your biography here. Tell the world about yourself. Link to your favorite [subreddit](http://reddit.com). You can put a picture in, too. The code is already in, just name your picture `prof_pic.jpg` and put it in the `img/` folder.
+Hi there, I am a Senior Research Engineer at [Google DeepMind](https://research.google/people/KehangHan/), with a current focus on generative modeling and discrete diffusion (see our latest work [MD4](https://arxiv.org/abs/2406.04329) and [AR2Diff](https://arxiv.org/abs/2401.17181)).
 
-Put your address / P.O. box / other info right below your picture. You can also disable any of these elements by editing `profile` property of the YAML header of your `_pages/about.md`. Edit `_bibliography/papers.bib` and Jekyll will render your [publications page](/al-folio/publications/) automatically.
+Previously, I completed [my PhD](https://dspace.mit.edu/handle/1721.1/121892) on complex systems, chemistry and ML at MIT. Then I spent one year in [Google Brain](https://en.wikipedia.org/wiki/Google_Brain) as an AI resident (2020-21), working with [Science team](https://research.google/teams/applied-science/) and [Reliable Deep Learning team](https://research.google/blog/towards-reliability-in-deep-learning-systems/).
 
-Link to your social media connections, too. This theme is set up to use [Font Awesome icons](https://fontawesome.com/) and [Academicons](https://jpswalsh.github.io/academicons/), like the ones below. Add your Facebook, Twitter, LinkedIn, Google Scholar, or just disable all of them.
+I'm broadly interested in deep learning, [probabilistic ML](https://probml.github.io/pml-book/book1.html), language modeling, [HPC](https://en.wikipedia.org/wiki/High-performance_computing) and [IoT](https://en.wikipedia.org/wiki/Internet_of_things). In the past I have made contributions to projects: [Gemini](https://arxiv.org/abs/2312.11805), [RT-2](https://arxiv.org/abs/2307.15818), [T5X](https://github.com/google-research/t5x), [Plex](https://arxiv.org/abs/2207.07411) and [RMG](https://rmg.mit.edu/). 
+
+If you'd like to connect, feel free to message me via email (the **envelope** icon below).
