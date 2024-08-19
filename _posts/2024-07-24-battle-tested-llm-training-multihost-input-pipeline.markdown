@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Battle-Tested LLM Training: The Input Pipeline"
+title: "Battle-Tested LLM Training: Multi-host Input Pipeline"
 date: 2024-07-24 10:16:16
 tags: llm
 ---
